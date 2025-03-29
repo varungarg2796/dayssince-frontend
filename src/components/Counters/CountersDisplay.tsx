@@ -19,7 +19,7 @@ export function CountersDisplay() {
   // --- Loading State ---
   if (isLoading) {
     return (
-      <Group position="center" mt="xl">
+      <Group align="center" justify="center" mt="xl">
           <Loader />
           <Text>Loading counters...</Text>
       </Group>
@@ -48,20 +48,16 @@ export function CountersDisplay() {
         <Title order={3} mb="md">Active Counters ({countersData.active.length})</Title>
         {countersData.active.length > 0 ? (
           // Use SimpleGrid for responsive columns
-          <SimpleGrid
-             cols={3} // Default to 3 columns
-             spacing="lg"
-             breakpoints={[
-               { maxWidth: 'md', cols: 2, spacing: 'md' }, // 2 cols on medium screens
-               { maxWidth: 'sm', cols: 1, spacing: 'sm' }, // 1 col on small screens
-             ]}
-           >
+              <SimpleGrid
+      cols={{ base: 1, sm: 2, md: 3 }}
+      spacing={{ base: 'sm', sm: 'md', md: 'lg' }}
+    >
               {countersData.active.map(counter => (
                   <CounterCard key={counter.id} counter={counter} />
               ))}
            </SimpleGrid>
          ) : (
-             <Text color="dimmed">No active counters yet. Add one!</Text> // Encourage action
+             <Text c="dimmed">No active counters yet. Add one!</Text> // Encourage action
          )}
        </section>
 
@@ -71,13 +67,9 @@ export function CountersDisplay() {
             <section>
                 <Title order={3} mb="md" mt="xl">Archived Counters ({countersData.archived.length})</Title>
                 <SimpleGrid
-                    cols={3}
-                    spacing="lg"
-                    breakpoints={[
-                        { maxWidth: 'md', cols: 2, spacing: 'md' },
-                        { maxWidth: 'sm', cols: 1, spacing: 'sm' },
-                    ]}
-                >
+                      cols={{ base: 1, sm: 2, md: 3 }}
+                      spacing={{ base: 'sm', sm: 'md', lg: 'lg' }}
+                  >
                     {countersData.archived.map(counter => (
                         <CounterCard key={counter.id} counter={counter} />
                     ))}
