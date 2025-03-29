@@ -41,3 +41,19 @@ export interface Tag {
     active: Counter[];
     archived: Counter[];
   }
+
+  export interface CreateCounterDto {
+    name: string;
+    description?: string;
+    startDate: string; // Expecting ISO string for API
+    isPrivate?: boolean;
+    tagIds?: number[];
+}
+
+export interface UpdateCounterPayload {
+    name?: string;
+    description?: string;
+    startDate?: string; // ISO String
+    isPrivate?: boolean;
+    tagIds?: number[];
+}

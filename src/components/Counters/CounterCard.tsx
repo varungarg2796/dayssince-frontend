@@ -80,8 +80,13 @@ const formatLocalDate = (dateString: string | null | undefined): string => {
 };
 // ---------------------------
 
+interface CounterCardProps {
+    counter: Counter;
+    onEdit: () => void;
+}
+
 // --- Main CounterCard Component ---
-export function CounterCard({ counter }: { counter: Counter }) {
+export function CounterCard({ counter, onEdit }: CounterCardProps)  {
     const isArchived = !!counter.archivedAt;
     const isMobile = useMediaQuery('(max-width: 768px)'); // For actions menu
     const [deleteModalOpened, { open: openDeleteModal, close: closeDeleteModal }] = useDisclosure(false);
@@ -147,8 +152,8 @@ export function CounterCard({ counter }: { counter: Counter }) {
     // ------------------------------------
 
     // --- Action Handlers ---
-    const handleEdit = () => console.log("Edit clicked:", counter.id);
-    const handleShare = () => console.log("Share clicked:", counter.id);
+    const handleEdit = onEdit;
+    const handleShare = () => console.log("Share clicked:", counter.id); // Keep placeholder
     const handleToggleArchive = () => { if (!isTogglingArchive) performToggleArchive(counter.id); };
     const handleDelete = () => openDeleteModal(); // Opens the modal
     const handleDeleteConfirm = () => { if (!isDeleting) performDelete(counter.id); };

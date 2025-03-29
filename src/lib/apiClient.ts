@@ -1,7 +1,7 @@
 // src/lib/apiClient.ts
 import axios from 'axios';
 import { useAuthStore } from '@/stores/authStore';
-import type { Counter, UserCounters } from '@/types'; // Import types
+import type { Counter, CreateCounterDto, UpdateCounterPayload, UserCounters } from '@/types'; // Import types
 
 const apiClient = axios.create({
   baseURL: 'http://localhost:3000/api',
@@ -57,9 +57,17 @@ export const unarchiveCounter = async (counterId: string): Promise<Counter> => {
     return data;
 };
 
-// --- Add Create/Update later ---
-// export const createCounter = async (payload: CreateCounterDto): Promise<Counter> => { ... }
-// export const updateCounter = async ({ id, payload }: { id: string; payload: UpdateCounterDto }): Promise<Counter> => { ... }
+export const createCounter = async (payload: CreateCounterDto): Promise<Counter> => {
+  console.log("Sending createCounter payload:", payload);
+  const { data } = await apiClient.post<Counter>('/counters', payload);
+  return data;
+};
+
+export const updateCounter = async ({ id, payload }: { id: string; payload: UpdateCounterPayload }): Promise<Counter> => {
+  console.log(`Sending updateCounter payload for ID ${id}:`, payload);
+  const { data } = await apiClient.patch<Counter>(`/counters/${id}`, payload);
+  return data;
+};
 
 
 export default apiClient;
