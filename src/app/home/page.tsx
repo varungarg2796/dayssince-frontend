@@ -1,7 +1,7 @@
 // src/app/home/page.tsx
 'use client'; // <-- ADD THIS DIRECTIVE
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 // Added Button, Group, useDisclosure
 import { Title, Button, Group } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks'; // Import hook for modal state
@@ -14,7 +14,7 @@ import { CounterFormData } from '@/components/Counters/CounterForm';
 import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
 import { notifications } from '@mantine/notifications';
 import { Tag, CreateCounterDto, Counter } from '@/types'; // Import Tag and Counter types
-import { createCounter, updateCounter } from '@/lib/apiClient';
+import { createCounter, fetchTags, updateCounter } from '@/lib/apiClient';
 import { UserCounters, UpdateCounterPayload } from '@/types'; 
 
 
@@ -30,19 +30,23 @@ export default function HomePage() {
 
   // --- Fetch available tags for the form ---
   // TODO: Implement GET /api/tags in backend and fetchTags in apiClient
-  const { data: tagsData, isLoading: isLoadingTags } = useQuery<Tag[]>({
-      queryKey: ['tags'],
-      queryFn: async () => {
-           console.warn("Tag fetching not implemented yet!"); // Placeholder
-           // Replace with: return await fetchTags();
-           return Promise.resolve([
-               {id: 1, name: 'Personal', slug: 'personal'},
-               {id: 2, name: 'Work', slug: 'work'},
-               {id: 3, name: 'Health', slug: 'health'}
-           ]); // Placeholder Data
-       },
-      staleTime: Infinity, // Tags likely don't change often
+  const { data: tagsData, isLoading: isLoadingTags, error: tagsError } = useQuery<Tag[], Error>({ // Added types
+    queryKey: ['tags'],
+    queryFn: fetchTags, // <-- Use the actual API function
+    staleTime: 1000 * 60 * 60, // Cache tags for an hour, they don't change often
+    // Keep previous data while refetching in background (optional)
+    // placeholderData: keepPreviousData,
   });
+  // Log error if tag fetching fails
+  useEffect(() => {
+    if (tagsError) {
+      notifications.show({
+        title: 'Error loading tags',
+        message: tagsError.message,
+        color: 'red',
+      });
+    }
+  }, [tagsError]);
 
   // --- Mutation for creating a counter ---
   const { mutate: addCounter, isPending: isCreating } = useMutation({
@@ -166,8 +170,8 @@ const handleFormSubmit = (data: CounterFormData) => {
            // Pass the correct loading state based on mode
            isLoading={editingCounter ? isUpdating : isCreating}
            initialData={editingCounter} // Pass the counter being edited
-           availableTags={tagsData}
-        />
+           availableTags={tagsData || []} // Pass fetched tags (or empty array if loading/error)
+           />
 
       </MainLayout>
     </Providers>

@@ -1,7 +1,7 @@
 // src/lib/apiClient.ts
 import axios from 'axios';
 import { useAuthStore } from '@/stores/authStore';
-import type { Counter, CreateCounterDto, UpdateCounterPayload, UserCounters } from '@/types'; // Import types
+import type { Counter, CreateCounterDto, Tag, UpdateCounterPayload, UserCounters } from '@/types'; // Import types
 
 const apiClient = axios.create({
   baseURL: 'http://localhost:3000/api',
@@ -66,6 +66,12 @@ export const createCounter = async (payload: CreateCounterDto): Promise<Counter>
 export const updateCounter = async ({ id, payload }: { id: string; payload: UpdateCounterPayload }): Promise<Counter> => {
   console.log(`Sending updateCounter payload for ID ${id}:`, payload);
   const { data } = await apiClient.patch<Counter>(`/counters/${id}`, payload);
+  return data;
+};
+
+export const fetchTags = async (): Promise<Tag[]> => {
+  console.log("Attempting to fetch /tags");
+  const { data } = await apiClient.get<Tag[]>('/tags');
   return data;
 };
 
