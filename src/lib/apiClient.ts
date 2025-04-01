@@ -1,7 +1,7 @@
 // src/lib/apiClient.ts
 import axios from 'axios';
 import { useAuthStore } from '@/stores/authStore';
-import type { Counter, CreateCounterDto, Tag, UpdateCounterPayload, UserCounters } from '@/types'; // Import types
+import type { Counter, CreateCounterDto, FindPublicCountersOptions, PaginatedCountersResult, Tag, UpdateCounterPayload, UserCounters } from '@/types'; // Import types
 
 const apiClient = axios.create({
   baseURL: 'http://localhost:3000/api',
@@ -72,6 +72,33 @@ export const updateCounter = async ({ id, payload }: { id: string; payload: Upda
 export const fetchTags = async (): Promise<Tag[]> => {
   console.log("Attempting to fetch /tags");
   const { data } = await apiClient.get<Tag[]>('/tags');
+  return data;
+};
+
+export const fetchPublicCounters = async (options: FindPublicCountersOptions): Promise<PaginatedCountersResult> => {
+  console.log("Attempting to fetch /counters/public with options:", options);
+  // Construct query parameters from options
+  const params = new URLSearchParams();
+  if (options.page) params.append('page', options.page.toString());
+  if (options.limit) params.append('limit', options.limit.toString());
+  if (options.sortBy) params.append('sortBy', options.sortBy);
+  if (options.sortOrder) params.append('sortOrder', options.sortOrder);
+  if (options.search) params.append('search', options.search);
+  // Join tag slugs with a comma if the array exists and is not empty
+  if (options.tagSlugs && options.tagSlugs.length > 0) {
+      params.append('tags', options.tagSlugs.join(','));
+  }
+
+  const { data } = await apiClient.get<PaginatedCountersResult>('/counters/public', { params });
+  return data;
+};
+
+export const fetchSingleCounter = async (id: string): Promise<Counter> => {
+  console.log(`Attempting to fetch /counters/${id}`);
+  // GET /api/counters/:id
+  // The backend handles privacy checks and view count increment
+  // The request interceptor automatically adds the auth token if available
+  const { data } = await apiClient.get<Counter>(`/counters/${id}`);
   return data;
 };
 
