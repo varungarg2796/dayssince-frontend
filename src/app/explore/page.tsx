@@ -1,19 +1,20 @@
 // src/app/explore/page.tsx
 'use client';
 
-// --- Imports ---
 import React, { useState, useEffect, useMemo } from 'react';
 import {
   Title, Text, Stack, Loader, Alert, SimpleGrid, Group, Container,
-  TextInput, Select, Chip, Pagination, Paper, Box,
+  TextInput, Select, Chip, Pagination, Paper, Box, SegmentedControl, useMantineTheme // Added useMantineTheme
 } from '@mantine/core';
 import { useQuery } from '@tanstack/react-query';
-import { fetchPublicCounters, fetchTags } from '@/lib/apiClient';
-import { PaginatedCountersResult, FindPublicCountersOptions, Tag } from '@/types';
-import { IconAlertCircle, IconSearch } from '@tabler/icons-react';
-import { CounterCard } from '@/components/Counters/CounterCard';
-import { MainLayout } from '@/components/Layout/MainLayout';
+import { fetchPublicCounters, fetchTags } from '@/lib/apiClient'; // Adjust path if needed
+import { PaginatedCountersResult, FindPublicCountersOptions, Tag, Counter } from '@/types'; // Added Counter, Adjust path
+import { IconAlertCircle, IconSearch, IconLayoutGrid, IconList, IconShare3 } from '@tabler/icons-react'; // Added Icons
+import { CounterCard } from '@/components/Counters/CounterCard'; // Adjust path if needed
+import { CounterListItem } from '@/components/Counters/CounterListItem'; // Adjust path if needed
+import { MainLayout } from '@/components/Layout/MainLayout'; // Adjust path if needed
 import { useDebouncedValue } from '@mantine/hooks';
+import { notifications } from '@mantine/notifications'; // For share notification
 
 // --- Constants ---
 const ITEMS_PER_PAGE = 12;
@@ -27,212 +28,150 @@ const sortOptions = [
 
 // --- Component ---
 export default function ExplorePage() {
-  // --- State for Query Options ---
+  const theme = useMantineTheme(); // Get theme for controls
+
+  // --- State ---
   const [page, setPage] = useState(1);
   const [limit] = useState(ITEMS_PER_PAGE);
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedTags, setSelectedTags] = useState<string[]>([]); // Holds tag *slugs*
-  const [sortValue, setSortValue] = useState<string>(sortOptions[0].value); // Default sort
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const [sortValue, setSortValue] = useState<string>(sortOptions[0].value);
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid'); // View mode
 
-  // --- Debounce Search Query ---
+  // --- Derived State & Effects ---
   const [debouncedSearchQuery] = useDebouncedValue(searchQuery, 400);
-
-  // --- Extract Sort Field and Order ---
   const [sortBy, sortOrder] = useMemo(() => {
-    const parts = sortValue.split('_');
-    const order = (parts[1] === 'asc' || parts[1] === 'desc') ? parts[1] : 'desc';
-    const field = parts[0] as FindPublicCountersOptions['sortBy'];
-    return [field, order as 'asc' | 'desc'];
-  }, [sortValue]);
+        const parts = sortValue.split('_');
+        const order = (parts[1] === 'asc' || parts[1] === 'desc') ? parts[1] : 'desc';
+        const field = parts[0] as FindPublicCountersOptions['sortBy'];
+        return [field, order];
+   }, [sortValue]);
+  useEffect(() => { setPage(1); }, [debouncedSearchQuery, selectedTags, sortValue]);
 
-  // --- Reset page to 1 when filters/search/sort change ---
-  useEffect(() => {
-    setPage(1);
-  }, [debouncedSearchQuery, selectedTags, sortValue]);
-
-  // --- Combine options for React Query ---
   const queryOptions: FindPublicCountersOptions = {
-    page,
-    limit,
-    search: debouncedSearchQuery || undefined,
-    tagSlugs: selectedTags.length > 0 ? selectedTags : undefined,
-    sortBy,
-    sortOrder,
-  };
+        page, limit,
+        search: debouncedSearchQuery || undefined,
+        tagSlugs: selectedTags.length > 0 ? selectedTags : undefined,
+        sortBy, sortOrder,
+   };
 
-  // --- Fetch Public Counters Data ---
-  const {
-    data: publicCountersData,
-    isLoading: isLoadingCounters,
-    error: countersError, // Keep separate error variable for counters
-    isError: isCountersError // Keep separate isError variable for counters
-  } = useQuery<PaginatedCountersResult, Error>({
+  // --- Data Fetching ---
+  const { data: publicCountersData, isLoading: isLoadingCounters, error: countersError, isError: isCountersError } = useQuery<PaginatedCountersResult, Error>({
       queryKey: ['publicCounters', JSON.stringify(queryOptions)],
       queryFn: () => fetchPublicCounters(queryOptions),
-      // Replace keepPreviousData with placeholderData
-      placeholderData: (previousData) => previousData,
+      placeholderData: (prev) => prev,
+  });
+  const { data: availableTags, isLoading: isLoadingTags, error: tagsError, isError: isTagsError } = useQuery<Tag[], Error>({
+      queryKey: ['tags'],
+      queryFn: fetchTags,
+      staleTime: 1000 * 60 * 60,
   });
 
-  // --- Fetch Available Tags ---
-  const {
-    data: availableTags,
-    isLoading: isLoadingTags,
-    error: tagsError, // Keep separate error variable for tags
-    isError: isTagsError // Keep separate isError variable for tags
-  } = useQuery<Tag[], Error>({
-    queryKey: ['tags'],
-    queryFn: fetchTags,
-    staleTime: 1000 * 60 * 60, // Cache for 1 hour
-  });
+  // --- Handlers ---
+  const handleTagChange = (newSlugs: string[]) => setSelectedTags(newSlugs);
+  const handleSortChange = (value: string | null) => { if(value) setSortValue(value); };
+  const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => setSearchQuery(event.currentTarget.value);
+  const handlePageChange = (newPage: number) => { setPage(newPage); window.scrollTo({ top: 0, behavior: 'smooth' }); };
+  const handleShareClick = (counter: Counter) => {
+       // Identical share logic as on home page (or CounterCard)
+       if (counter.isPrivate) return; // Should not happen on explore, but safety check
+       const shareUrl = `${window.location.origin}/counter/${counter.id}`;
+       navigator.clipboard.writeText(shareUrl).then(() => {
+           notifications.show({ title: 'Link Copied!', message: `Link to "${counter.name}" copied.`, color: 'teal', autoClose: 3000, icon:<IconShare3 size="1rem"/>});
+       }).catch(err => {
+           notifications.show({ title: 'Error', message: 'Could not copy link.', color: 'red' });
+           console.error('Failed to copy share link:', err);
+       });
+   };
 
-  // --- Handlers for Controls ---
-  const handleTagChange = (newSelectedTagSlugs: string[]) => {
-    setSelectedTags(newSelectedTagSlugs);
-    // Page reset handled by useEffect
-  };
+  const controlsDisabled = isLoadingTags; // Base disabling on tag loading
 
-  const handleSortChange = (value: string | null) => {
-    if (value) {
-      setSortValue(value);
-      // Page reset handled by useEffect
-    }
-  };
-
-  const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchQuery(event.currentTarget.value);
-     // Page reset handled by useEffect listening to debouncedSearchQuery
-  };
-
-  const handlePageChange = (newPage: number) => {
-    setPage(newPage);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
-
-  // Determine overall loading state for UI disabling etc.
-  const controlsDisabled = isLoadingTags; // Disable controls while tags load initially
-
+  // --- Render ---
   return (
     <MainLayout>
-      <Container size="xl"> {/* Constrain width */}
+      <Container size="xl">
         <Stack gap="lg">
           <Title order={2}>Explore Public Counters</Title>
 
-          {/* --- Filter/Sort Controls Area --- */}
+          {/* Filter/Sort Controls Area */}
           <Paper shadow="xs" p="md" radius="md" withBorder>
             <Stack gap="lg">
-              {/* Search and Sort Row */}
-               <Group grow align="flex-end">
-                <TextInput
-                  label="Search"
-                  placeholder="Search counters..."
-                  leftSection={<IconSearch size={16} stroke={1.5} />}
-                  value={searchQuery}
-                  onChange={handleSearchChange}
-                  disabled={controlsDisabled}
-                />
-                <Select
-                  label="Sort by"
-                  data={sortOptions}
-                  value={sortValue}
-                  onChange={handleSortChange}
-                  allowDeselect={false}
-                  disabled={controlsDisabled}
-                />
-              </Group>
+              <Group grow align="flex-end" preventGrowOverflow={false} wrap="nowrap">
+                  <TextInput label="Search" placeholder="Search counters..." leftSection={<IconSearch size={16}/>} value={searchQuery} onChange={handleSearchChange} disabled={controlsDisabled} style={{flexGrow: 1}} />
+                   <Box style={{ flexShrink: 0 }}>
+                       <Group gap="md" wrap="nowrap">
+                          <Select label="Sort by" data={sortOptions} value={sortValue} onChange={handleSortChange} allowDeselect={false} disabled={controlsDisabled} miw={150} />
+                          <Stack gap={4}>
+                              <Text size="sm" fw={500} component="label" htmlFor="view-toggle">View</Text> {/* Added label + htmlFor */}
+                             <SegmentedControl
+                                id="view-toggle" // Added id for label association
+                                value={viewMode}
+                                onChange={(value) => setViewMode(value as 'grid' | 'list')}
+                                data={[ { label: <IconLayoutGrid size={16}/>, value: 'grid' }, { label: <IconList size={16} />, value: 'list' } ]}
+                                size="sm"
+                                disabled={controlsDisabled}
+                                color={theme.primaryColor} // Use theme color
+                            />
+                          </Stack>
+                     </Group>
+                   </Box>
+               </Group>
 
               {/* Categories (Tags) Filter */}
               <Box>
-                <Text size="sm" fw={500} mb={5}>Categories</Text>
-                {isLoadingTags ? (
-                  <Loader size="xs" />
-                ) : isTagsError ? ( // Use isTagsError
-                  <Text size="sm" c="red">Could not load categories: {tagsError?.message}</Text> // Use tagsError
-                ) : availableTags && availableTags.length > 0 ? (
-                  <Chip.Group multiple value={selectedTags} onChange={handleTagChange}>
-                     <Group gap="xs" wrap="wrap">
-                      {availableTags.map((tag) => (
-                        <Chip key={tag.slug} value={tag.slug} size="sm" radius="sm" variant="outline">
-                          {tag.name}
-                        </Chip>
-                      ))}
-                    </Group>
-                  </Chip.Group>
-                ) : (
-                  <Text size="sm" c="dimmed">No categories available.</Text>
-                )}
-              </Box>
+                 <Text size="sm" fw={500} mb={5}>Categories</Text>
+                  {isLoadingTags ? ( <Loader size="xs" /> )
+                    : isTagsError ? ( <Text size="sm" c="red">Could not load categories: {tagsError?.message}</Text> )
+                    : availableTags && availableTags.length > 0 ? (
+                         <Chip.Group multiple value={selectedTags} onChange={handleTagChange}>
+                             <Group gap="xs" wrap="wrap">
+                                 {availableTags.map((tag) => (
+                                     <Chip key={tag.slug} value={tag.slug} size="sm" radius="sm" variant="outline">
+                                         {tag.name}
+                                     </Chip>
+                                ))}
+                             </Group>
+                         </Chip.Group>
+                     ) : ( <Text size="sm" c="dimmed">No categories available.</Text> )
+                   }
+               </Box>
             </Stack>
           </Paper>
-          {/* ------------------------------------------- */}
 
+          {/* Display Area */}
+          {isLoadingCounters && (<Group justify="center" mt="xl"><Loader /><Text ml="xs">Loading...</Text></Group>)}
+          {isCountersError && !isLoadingCounters && (<Alert icon={<IconAlertCircle/>} color="red" title="Error!" mt="lg">{countersError?.message || 'Could not load counters'}</Alert>)}
 
-          {/* --- Display Area --- */}
-          {/* Show loader only when actively fetching counters */}
-          {isLoadingCounters && (
-            <Group justify="center" mt="xl">
-              <Loader />
-              <Text>Loading public counters...</Text>
-            </Group>
-          )}
-
-          {/* Show error specifically for counters fetch */}
-          {isCountersError && !isLoadingCounters && ( // Use isCountersError
-            <Alert icon={<IconAlertCircle size="1rem" />} title="Error!" color="red" mt="lg">
-              {/* Use countersError */}
-              Failed to load public counters: {countersError?.message || 'Unknown error'}
-            </Alert>
-          )}
-
-          {/* Display grid and pagination only when counters are not loading and there's no counters error */}
-          {/* Use optional chaining ?. for safety */}
           {!isLoadingCounters && !isCountersError && publicCountersData?.items && (
             <>
-              {publicCountersData.items.length > 0 ? (
-                <SimpleGrid
-                  cols={{ base: 1, sm: 2, md: 3 }}
-                  spacing={{ base: 'sm', md: 'lg' }}
-                  mt="md"
-                >
-                  {publicCountersData.items.map(counter => (
-                    <CounterCard
-                      key={counter.id}
-                      counter={counter}
-                      // No onEdit prop passed here, so CounterCard (if modified) will hide owner actions
-                    />
-                  ))}
-                </SimpleGrid>
+              {publicCountersData.items.length === 0 ? (
+                  !isLoadingCounters && <Text c="dimmed" ta="center" mt="xl">No public counters found matching your criteria.</Text>
               ) : (
-                 // Show 'no results' only if fetch succeeded but returned empty
-                !isLoadingCounters && <Text c="dimmed" ta="center" mt="xl">No public counters found matching your criteria.</Text>
+                  viewMode === 'grid' ? (
+                    <SimpleGrid cols={{ base: 1, sm: 2, md: 3 }} spacing="lg" mt="md">
+                        {publicCountersData.items.map(counter => ( <CounterCard key={counter.id} counter={counter} /> ))}
+                    </SimpleGrid>
+                 ) : ( // viewMode === 'list'
+                    <Stack gap="xs" mt="md">
+                        {publicCountersData.items.map(counter => (
+                            <CounterListItem
+                                key={counter.id}
+                                counter={counter}
+                                isOwnerView={false} // Explicitly false
+                                onShare={() => handleShareClick(counter)} // Pass share handler
+                                // No edit/delete/archive needed
+                            />
+                        ))}
+                     </Stack>
+                 )
               )}
 
-              {/* --- Pagination Controls --- */}
-              {/* Check totalPages with optional chaining */}
-              {(publicCountersData?.totalPages ?? 0) > 1 && (
-                <Group justify="center" mt="xl">
-                   <Pagination
-                        // Use optional chaining and nullish coalescing
-                        total={publicCountersData?.totalPages ?? 1}
-                        value={publicCountersData?.currentPage ?? 1}
-                        onChange={handlePageChange}
-                        siblings={1}
-                        boundaries={1}
-                    />
-                </Group>
-              )}
-              {/* Total items info */}
-              <Text size="sm" c="dimmed" ta="center" mt="xs">
-                   {publicCountersData?.totalItems ?? 0} items found
-              </Text>
-              {/* -------------------------------------- */}
+              {/* Pagination */}
+              {(publicCountersData?.totalPages ?? 0) > 1 && (<Group justify="center" mt="xl"><Pagination total={publicCountersData.totalPages} value={publicCountersData.currentPage} onChange={handlePageChange} siblings={1} boundaries={1} /></Group>)}
+              <Text size="sm" c="dimmed" ta="center" mt="xs">{publicCountersData?.totalItems ?? 0} items found</Text>
             </>
           )}
-           {/* Handle case where data might still be undefined after loading/no error */}
-           {!isLoadingCounters && !isCountersError && !publicCountersData && (
-               <Text c="dimmed" ta="center" mt="xl">Could not display counters.</Text>
-           )}
-          {/* -------------------- */}
-
+          {!isLoadingCounters && !isCountersError && !publicCountersData && (<Text c="dimmed" ta="center" mt="xl">Could not display counters.</Text>)}
         </Stack>
       </Container>
     </MainLayout>
