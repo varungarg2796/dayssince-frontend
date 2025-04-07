@@ -8,37 +8,32 @@ import { fetchMyCounters } from '@/lib/apiClient';
 import { UserCounters, Counter } from '@/types';
 import { IconAlertCircle } from '@tabler/icons-react';
 import { CounterCard } from './CounterCard';
-import { CounterListItem } from './CounterListItem'; // Import the new list item
+import { CounterListItem } from './CounterListItem';
 
 interface CountersDisplayProps {
     onEditCounter: (counter: Counter) => void;
-    // Add props for other actions triggered from ListItem
     onDeleteCounter: (counter: Counter) => void;
-    onToggleArchiveCounter: (counter: Counter) => void;
+    onRequestToggleArchive: (counter: Counter) => void; // Renamed prop
     onShareCounter: (counter: Counter) => void;
-    // Add viewMode prop
     viewMode: 'grid' | 'list';
 }
 
 export function CountersDisplay({
     onEditCounter,
     onDeleteCounter,
-    onToggleArchiveCounter,
+    onRequestToggleArchive, // Use new name
     onShareCounter,
-    viewMode // Receive viewMode from parent
+    viewMode
 }: CountersDisplayProps) {
     const { data: countersData, isLoading, error, isError } = useQuery<UserCounters, Error>({
         queryKey: ['myCounters'],
         queryFn: fetchMyCounters,
-        // keepPreviousData: true, // Optional: for smoother loading between views?
     });
 
-    // Loading State
     if (isLoading) {
         return <Group justify="center" mt="xl"><Loader /><Text ml="sm">Loading counters...</Text></Group>;
     }
 
-    // Error State
     if (isError) {
         return (
             <Alert icon={<IconAlertCircle size="1rem" />} title="Error!" color="red" mt="lg">
@@ -64,6 +59,9 @@ export function CountersDisplay({
                             key={counter.id}
                             counter={counter}
                             onEdit={() => onEditCounter(counter)}
+                            onRequestToggleArchive={() => onRequestToggleArchive(counter)} // Pass down correct prop
+                            onDelete={() => onDeleteCounter(counter)}
+                            onShare={() => onShareCounter(counter)}
                         />
                     ))}
                 </SimpleGrid>
@@ -75,10 +73,10 @@ export function CountersDisplay({
                         <CounterListItem
                             key={counter.id}
                             counter={counter}
-                            isOwnerView={true} // Always owner view on "My Counters" page
+                            isOwnerView={true}
                             onEdit={() => onEditCounter(counter)}
                             onDelete={() => onDeleteCounter(counter)}
-                            onToggleArchive={() => onToggleArchiveCounter(counter)}
+                            onRequestToggleArchive={() => onRequestToggleArchive(counter)} // Pass down correct prop
                             onShare={() => onShareCounter(counter)}
                         />
                     ))}
@@ -88,14 +86,12 @@ export function CountersDisplay({
     };
 
     return (
-        <Stack gap="xl"> {/* Added larger gap between sections */}
-            {/* Active Counters Section */}
+        <Stack gap="xl">
             <section>
                 <Title order={4} mb={viewMode === 'list' ? 'xs' : 'md'}>Active ({countersData.active.length})</Title>
                 {renderCounters(countersData.active, "Active")}
             </section>
 
-            {/* Archived Counters Section */}
             {countersData.archived.length > 0 && (
                 <section>
                     <Title order={4} mb={viewMode === 'list' ? 'xs' : 'md'} mt="xl">Archived ({countersData.archived.length})</Title>
