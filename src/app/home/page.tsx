@@ -13,12 +13,13 @@ import { AddEditCounterModal } from '@/components/Counters/AddEditCounterModal';
 import { CounterFormData } from '@/components/Counters/CounterForm';
 import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
 import { notifications } from '@mantine/notifications';
-import { Tag, Counter, UpdateCounterPayload, UserCounters } from '@/types';
+import { Tag, Counter, UpdateCounterPayload, UserCounters, CreateCounterDto } from '@/types';
 import { ModernDateTimePicker } from '@/components/Counters/ModernDateTimePicker'; // Import the date picker
 import {
     createCounter, fetchTags, updateCounter, deleteCounter, archiveCounter, unarchiveCounter
 } from '@/lib/apiClient';
 import { useAuthStore } from '@/stores/authStore';
+import axios from 'axios';
 
 export default function HomePage() {
     const [modalOpened, { open: openModal, close: closeModal }] = useDisclosure(false);
@@ -52,38 +53,40 @@ export default function HomePage() {
 
     // Mutations
     const { mutate: addCounter, isPending: isCreating } = useMutation({
-      mutationFn: (formData: CounterFormData) => {
-        const payload = {
-          name: formData.name,
-          description: formData.description || undefined,
-          startDate: formData.startDate instanceof Date && !isNaN(formData.startDate.getTime()) ? formData.startDate.toISOString() : new Date().toISOString(),
-          isPrivate: formData.isPrivate,
-          tagIds: formData.tagIds || []
-        };
-        return createCounter(payload);
+        mutationFn: (formData: CounterFormData) => {
+            const payload: CreateCounterDto = {
+                name: formData.name, description: formData.description || undefined,
+                startDate: formData.startDate instanceof Date && !isNaN(formData.startDate.getTime()) ? formData.startDate.toISOString() : new Date().toISOString(),
+                isPrivate: formData.isPrivate, tagIds: formData.tagIds || [],
+                slug: (!formData.isPrivate && formData.slug && formData.slug.trim()) ? formData.slug.trim() : undefined,
+            }; return createCounter(payload);
       },
       onSuccess: () => {
           notifications.show({ title: 'Success', message: 'Counter created!', color: 'green' });
           queryClient.invalidateQueries({ queryKey: ['myCounters'] });
           closeModal();
       },
-      onError: (error: Error) => {
-          notifications.show({ title: 'Error', message: `Failed to create: ${error.message}`, color: 'red' });
-      },
+      onError: (error: unknown) => { 
+        let message = `Failed to create: ${error instanceof Error ? error.message : 'Unknown error'}`;
+        if (axios.isAxiosError(error) && error.response?.status === 409) {
+             message = error.response.data?.message || 'That custom URL slug is already taken.';
+        } else if (axios.isAxiosError(error) && error.response?.data?.message) {
+             message = Array.isArray(error.response.data.message) ? error.response.data.message.join(', ') : error.response.data.message;
+        }
+        notifications.show({ title: 'Error', message, color: 'red' });
+     },
     });
 
     const { mutate: editCounter, isPending: isUpdating } = useMutation({
         mutationFn: (formData: CounterFormData) => {
-             if (!editingCounter) throw new Error("Target counter for edit not found.");
-             const payload: UpdateCounterPayload = {
-                 name: formData.name,
-                 description: formData.description || undefined,
-                 startDate: formData.startDate instanceof Date && !isNaN(formData.startDate.getTime()) ? formData.startDate.toISOString() : undefined,
-                 isPrivate: formData.isPrivate,
-                 tagIds: formData.tagIds || []
-             };
-             return updateCounter({ id: editingCounter.id, payload });
-        },
+            if (!editingCounter) throw new Error("Target counter for edit not found.");
+            const payload: UpdateCounterPayload = {
+                name: formData.name, description: formData.description || undefined,
+                startDate: formData.startDate instanceof Date && !isNaN(formData.startDate.getTime()) ? formData.startDate.toISOString() : undefined,
+                isPrivate: formData.isPrivate, tagIds: formData.tagIds || [],
+                slug: (!formData.isPrivate && formData.slug && formData.slug.trim()) ? formData.slug.trim() : undefined,
+            }; return updateCounter({ id: editingCounter.id, payload });
+       },
         onSuccess: (updatedCounterData) => {
             notifications.show({ title: 'Success', message: 'Counter updated!', color: 'green' });
              queryClient.setQueryData<UserCounters>(['myCounters'], (oldData) => {
@@ -98,8 +101,14 @@ export default function HomePage() {
              });
             closeModal();
         },
-        onError: (error: Error) => {
-            notifications.show({ title: 'Error', message: `Failed to update: ${error.message}`, color: 'red' });
+        onError: (error: unknown) => { /* ... handle 409 slug error ... */
+            let message = `Failed to update: ${error instanceof Error ? error.message : 'Unknown error'}`;
+            if (axios.isAxiosError(error) && error.response?.status === 409) {
+                message = error.response.data?.message || 'That custom URL slug is already taken.';
+            } else if (axios.isAxiosError(error) && error.response?.data?.message) {
+                message = Array.isArray(error.response.data.message) ? error.response.data.message.join(', ') : error.response.data.message;
+            }
+            notifications.show({ title: 'Error', message, color: 'red' });
         },
     });
 
@@ -192,18 +201,18 @@ export default function HomePage() {
 
     // Share Handler
     const handleShareClick = (counter: Counter) => {
-        if (counter.isPrivate) {
-             notifications.show({ title: 'Private Counter', message: 'Cannot share a private counter link.', color: 'yellow' });
+        if (counter.isPrivate || !counter.slug) {
+             notifications.show({ title: 'Cannot Share', message: 'This counter is private or does not have a public link.', color: 'orange' });
              return;
         }
-        const shareUrl = `${window.location.origin}/counter/${counter.id}`;
+        const shareUrl = `${window.location.origin}/c/${counter.slug}`;
         navigator.clipboard.writeText(shareUrl).then(() => {
-            notifications.show({ title: 'Link Copied!', message: `Link to "${counter.name}" copied.`, color: 'teal', autoClose: 3000, icon:<IconShare3 size="1rem"/>});
+            notifications.show({ title: 'Link Copied!', message: `Public link for "${counter.name}" copied.`, color: 'teal', autoClose: 3000, icon:<IconShare3 size="1rem"/>});
         }).catch(err => {
              notifications.show({ title: 'Error', message: 'Could not copy link.', color: 'red' });
              console.error('Failed to copy share link:', err);
          });
-     };
+    };
 
     // Render Logic
     if (isAuthLoading) { return (<MainLayout><Center style={{ height: 'calc(100vh - 120px)' }}><Loader size="lg" /></Center></MainLayout>); }

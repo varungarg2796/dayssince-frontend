@@ -98,11 +98,15 @@ export default function SingleCounterPage() {
     // --- End Timer State Logic ---
 
     // --- Share Handler ---
-     const handleShare = () => {
-        if (!counter) return;
-        const shareUrl = window.location.href; // Get current page URL
+    const handleShare = () => {
+        if (!counter || counter.isPrivate || !counter.slug) {
+             notifications.show({ title: 'Cannot Share', message: 'This counter is private or does not have a public link.', color: 'orange' });
+             return;
+        }
+        // Always copy the public /c/:slug URL
+        const shareUrl = `${window.location.origin}/c/${counter.slug}`;
         navigator.clipboard.writeText(shareUrl).then(() => {
-            notifications.show({ title: 'Link Copied!', message: 'Link to this page copied to clipboard.', color: 'teal' });
+            notifications.show({ title: 'Link Copied!', message: 'Public link copied to clipboard.', color: 'teal' });
         }).catch(err => {
             notifications.show({ title: 'Error', message: 'Could not copy link.', color: 'red' });
             console.error('Failed to copy share link:', err);

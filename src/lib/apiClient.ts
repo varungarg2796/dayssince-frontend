@@ -126,7 +126,10 @@ export const fetchSingleCounter = async (id: string): Promise<Counter> => { cons
 export const createCounter = async (payload: CreateCounterDto): Promise<Counter> => { const {data} = await apiClient.post('/counters', payload); return data; };
 export const updateCounter = async ({ id, payload }: { id: string; payload: UpdateCounterPayload }): Promise<Counter> => { const {data} = await apiClient.patch(`/counters/${id}`, payload); return data; };
 export const deleteCounter = async (id: string): Promise<void> => { await apiClient.delete(`/counters/${id}`); };
-
+export const fetchCounterBySlugPublic = async (slug: string): Promise<Counter> => {
+  const { data } = await apiClient.get(`/counters/c/${slug}`); // Use /c/ endpoint
+  return data;
+};
 // Modified archiveCounter
 export const archiveCounter = async (id: string, archiveAt?: Date): Promise<Counter> => {
   let payload = {}; // Default empty payload

@@ -13,7 +13,7 @@ import { CounterListItem } from './CounterListItem';
 interface CountersDisplayProps {
     onEditCounter: (counter: Counter) => void;
     onDeleteCounter: (counter: Counter) => void;
-    onRequestToggleArchive: (counter: Counter) => void; // Renamed prop
+    onRequestToggleArchive: (counter: Counter) => void;
     onShareCounter: (counter: Counter) => void;
     viewMode: 'grid' | 'list';
 }
@@ -21,7 +21,7 @@ interface CountersDisplayProps {
 export function CountersDisplay({
     onEditCounter,
     onDeleteCounter,
-    onRequestToggleArchive, // Use new name
+    onRequestToggleArchive,
     onShareCounter,
     viewMode
 }: CountersDisplayProps) {
@@ -58,8 +58,9 @@ export function CountersDisplay({
                         <CounterCard
                             key={counter.id}
                             counter={counter}
+                            isOwnerView={true}
                             onEdit={() => onEditCounter(counter)}
-                            onRequestToggleArchive={() => onRequestToggleArchive(counter)} // Pass down correct prop
+                            onRequestToggleArchive={() => onRequestToggleArchive(counter)}
                             onDelete={() => onDeleteCounter(counter)}
                             onShare={() => onShareCounter(counter)}
                         />
@@ -73,10 +74,10 @@ export function CountersDisplay({
                         <CounterListItem
                             key={counter.id}
                             counter={counter}
-                            isOwnerView={true}
+                            isOwnerView={true} // This was already correct here
                             onEdit={() => onEditCounter(counter)}
                             onDelete={() => onDeleteCounter(counter)}
-                            onRequestToggleArchive={() => onRequestToggleArchive(counter)} // Pass down correct prop
+                            onRequestToggleArchive={() => onRequestToggleArchive(counter)}
                             onShare={() => onShareCounter(counter)}
                         />
                     ))}
