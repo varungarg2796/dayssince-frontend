@@ -1,13 +1,13 @@
 // src/components/Counters/AddEditCounterModal.tsx
 import React from 'react';
 import { Modal } from '@mantine/core';
-import { CounterForm, CounterFormData } from './CounterForm'; // Import form and types
-import { Counter, Tag } from '@/types'; // Import types
+import { CounterForm } from './CounterForm'; // Import form and types
+import { Counter, CreateCounterDto, Tag, UpdateCounterPayload } from '@/types'; // Import types
 
 interface AddEditCounterModalProps {
     opened: boolean;
     onClose: () => void;
-    onSubmit: (data: CounterFormData) => void; // Function to handle form submission API call
+    onSubmit: (data: CreateCounterDto | UpdateCounterPayload) => void;
     isLoading: boolean; // Loading state from mutation
     initialData?: Counter | null; // Data for editing, null/undefined for adding
     availableTags?: Tag[]; // Available tags
