@@ -3,35 +3,30 @@
 
 import React from 'react';
 import { MantineProvider } from '@mantine/core';
-import { theme } from '../theme';
+import { theme } from '../theme'; // Import your custom theme
 import AuthProvider from './AuthProvider';
-// --- React Query Imports ---
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
-// --- Mantine Notifications ---
 import { Notifications } from '@mantine/notifications';
-import '@mantine/notifications/styles.css'; // Import styles for notifications
+import '@mantine/notifications/styles.css';
 
-// Create React Query client instance
 const queryClient = new QueryClient({
   defaultOptions: {
-    queries: {
-      staleTime: 1000 * 60 * 5, // 5 minutes
-      refetchOnWindowFocus: false,
-    },
+    queries: { staleTime: 1000 * 60 * 5, refetchOnWindowFocus: false, },
   },
 });
 
 export function Providers({ children }: { children: React.ReactNode }) {
   return (
-    <QueryClientProvider client={queryClient}> {/* React Query */}
-      <MantineProvider theme={theme} defaultColorScheme="auto"> {/* Mantine */}
-         <Notifications position="top-right" /> {/* Mantine Notifications */}
-        <AuthProvider> {/* Your Auth Logic */}
+    <QueryClientProvider client={queryClient}>
+      {/* Pass your custom theme here */}
+      <MantineProvider theme={theme} defaultColorScheme="auto">
+         <Notifications position="top-right" />
+        <AuthProvider>
           {children}
         </AuthProvider>
       </MantineProvider>
-      <ReactQueryDevtools initialIsOpen={false} /> {/* React Query DevTools */}
+      <ReactQueryDevtools initialIsOpen={false} />
     </QueryClientProvider>
   );
 }
