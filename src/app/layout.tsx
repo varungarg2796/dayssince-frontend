@@ -3,7 +3,7 @@ import '@mantine/core/styles.css';
 import React from 'react';
 import { ColorSchemeScript } from '@mantine/core';
 import { Providers } from './providers';
-import NProgressComponent from '@/components/Layout/NProgressComponent'; // Import the renamed component
+import  {PageLoadingIndicator}  from '@/components/Layout/PageLoadingIndicator';
 import { Inter } from 'next/font/google';
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
@@ -25,7 +25,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body>
         <Providers>
            {/* Render NProgressComponent here so it has access to context/hooks */}
-           <NProgressComponent />
+           <PageLoadingIndicator />
            {children}
         </Providers>
       </body>
