@@ -1,36 +1,58 @@
 /* src/app/globals.css */
-@import "@mantine/core/styles.css";
-@import "@mantine/notifications/styles.css";
 @import 'nprogress/nprogress.css'; /* <<< REQUIRED IMPORT */
 
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
 
-:root {
-   --brand-primary: var(--mantine-color-deepBlue-6);
-   --brand-accent: var(--mantine-color-vibrantTeal-6); /* Ensure vibrantTeal exists */
+
+/* NProgress customization */
+#nprogress {
+  pointer-events: none;
 }
 
-body {
-  background-color: var(--mantine-color-body);
-  color: var(--mantine-color-text);
-}
-
-/* NProgress Customization */
 #nprogress .bar {
-  background: var(--brand-accent) !important;
-  height: 3px !important;
-  z-index: 9999 !important;
-  position: fixed !important; /* Important */
+  background: var(--mantine-primary-color-filled);
+  position: fixed;
+  z-index: 9999;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 3px;
 }
-#nprogress .peg {
-   box-shadow: 0 0 10px var(--brand-accent), 0 0 5px var(--brand-accent) !important;
+
+/* Add spinner styles */
+#nprogress .spinner {
+  display: block;
+  position: fixed;
+  z-index: 9999;
+  top: 15px;
+  right: 15px;
 }
+
 #nprogress .spinner-icon {
-  border-top-color: var(--brand-accent) !important;
-  border-left-color: var(--brand-accent) !important;
-  width: 18px !important;
-  height: 18px !important;
+  width: 18px;
+  height: 18px;
+  box-sizing: border-box;
+  border: solid 2px transparent;
+  border-top-color: var(--mantine-primary-color-filled);
+  border-left-color: var(--mantine-primary-color-filled);
+  border-radius: 50%;
+  animation: nprogress-spinner 400ms linear infinite;
+}
+
+#nprogress .peg {
+  display: block;
+  position: absolute;
+  right: 0px;
+  width: 100px;
+  height: 100%;
+  box-shadow: 0 0 10px var(--mantine-primary-color-filled),
+              0 0 5px var(--mantine-primary-color-filled);
+  opacity: 1;
+  transform: rotate(3deg) translate(0px, -4px);
+}
+
+/* Add spinner animation */
+@keyframes nprogress-spinner {
+  0%   { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
 /* --- End NProgress Customization --- */
