@@ -1,6 +1,6 @@
 // src/app/layout.tsx
 import '@mantine/core/styles.css';
-import React from 'react';
+import React, { Suspense } from 'react';
 import { ColorSchemeScript } from '@mantine/core';
 import { Providers } from './providers';
 import  {PageLoadingIndicator}  from '@/components/Layout/PageLoadingIndicator';
@@ -24,8 +24,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       </head>
       <body>
         <Providers>
+          <Suspense fallback={null}>
+
            {/* Render NProgressComponent here so it has access to context/hooks */}
            <PageLoadingIndicator />
+           </Suspense>
+
            {children}
         </Providers>
       </body>
