@@ -45,7 +45,7 @@ export default function AuthCallbackPage() {
          const fetchUser = async (token: string) => {
              try {
                  // Use fetch or apiClient directly - apiClient already has interceptor
-                 const response = await fetch('http://localhost:3000/api/users/me', {
+                 const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3000'}`, {
                      headers: { 'Authorization': `Bearer ${token}` }
                  });
                  if (!response.ok) throw new Error(`Failed to fetch user (${response.status})`);
