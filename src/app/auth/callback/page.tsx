@@ -42,26 +42,38 @@ export default function AuthCallbackPage() {
         console.log('AuthCallback: Tokens stored in localStorage');
 
         // Immediately verify token and get user data
-         const fetchUser = async (token: string) => {
-             try {
-                 // Use fetch or apiClient directly - apiClient already has interceptor
-                 const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3000'}`, {
-                     headers: { 'Authorization': `Bearer ${token}` }
-                 });
-                 if (!response.ok) throw new Error(`Failed to fetch user (${response.status})`);
-                 const user = await response.json();
-                 setUser(user); // Update zustand store
-                 console.log('AuthCallback: User fetched and set');
-                 // Redirect to intended destination after successful verification
-                 router.replace('/home');
-             } catch (err) {
-                 console.error("AuthCallback: Error fetching user after getting tokens", err);
-                 localStorage.removeItem('accessToken'); // Clear bad tokens
-                 localStorage.removeItem('refreshToken');
-                 setUser(null);
-                 router.replace('/?error=user_fetch_failed');
-             }
-         };
+        const fetchUser = async (token: string) => {
+          try {
+              const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3000';
+              console.log(`AuthCallback FE: Fetching user from ${baseUrl}/api/users/me`); // Added log
+
+              // Use fetch or apiClient directly - apiClient already has interceptor
+              const response = await fetch(`${baseUrl}/api/users/me`, { // Corrected URL
+                  headers: { 'Authorization': `Bearer ${token}` }
+              });
+
+              console.log('AuthCallback FE: Fetch response status:', response.status); // Added log
+              if (!response.ok) {
+                  // Log response body if possible on error
+                  let errorBody = 'Could not read error body';
+                  try { errorBody = await response.text(); } catch { /* ignore */ }
+                  console.error('AuthCallback FE: Fetch failed response body:', errorBody);
+                  throw new Error(`Failed to fetch user (${response.status})`);
+              }
+
+              const user = await response.json();
+              setUser(user); // Update zustand store
+              console.log('AuthCallback FE: User fetched and set:', user?.username); // Added log
+              // Redirect to intended destination after successful verification
+              router.replace('/home');
+          } catch (err) {
+              console.error("AuthCallback: Error fetching user after getting tokens", err);
+              localStorage.removeItem('accessToken'); // Clear bad tokens
+              localStorage.removeItem('refreshToken');
+              setUser(null);
+              router.replace('/?error=user_fetch_failed');
+          }
+      };
          fetchUser(accessToken);
 
       } else {
