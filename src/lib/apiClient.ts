@@ -7,10 +7,11 @@ import type {
 } from '@/types';
 
 const apiClient = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3000/api',
+  baseURL: process.env.NEXT_PUBLIC_API_BASE_URL + '/api' || 'http://localhost:3000/api',
   timeout: 10000,
 });
 
+console.log(console.log('API Base URL:', process.env.NEXT_PUBLIC_API_BASE_URL));
 let isCurrentlyRefreshing = false;
 let failedRequestQueue: { resolve: (value: unknown) => void; reject: (reason?: unknown) => void; config: InternalAxiosRequestConfig; }[] = [];
 
@@ -48,7 +49,7 @@ const logoutUserInternal = async (): Promise<void> => {
 
   if (refreshTokenToRevoke && accessTokenForBackendCall) {
       try {
-          const baseUrl = apiClient.defaults.baseURL || 'http://localhost:3000/api';
+          const baseUrl = apiClient.defaults.baseURL + '/api' || 'http://localhost:3000/api';
           await axios.post( `${baseUrl}/auth/logout`, { refreshToken: refreshTokenToRevoke }, { headers: { 'Authorization': `Bearer ${accessTokenForBackendCall}` }, timeout: 4000 });
       } catch { /* Ignore logout errors */ }
   }
@@ -56,7 +57,7 @@ const logoutUserInternal = async (): Promise<void> => {
 
 const refreshAccessTokenInternal = async (refreshToken: string): Promise<string> => {
     try {
-        const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3000/api';
+        const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL + '/api' || 'http://localhost:3000/api';
         const response = await axios.post<{ accessToken: string }>( `${baseUrl}/auth/refresh`, { refreshToken } );
         const { accessToken: newAccessToken } = response.data;
         if (!newAccessToken) throw new Error("No access token in refresh response");
