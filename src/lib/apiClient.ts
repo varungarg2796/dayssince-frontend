@@ -49,7 +49,7 @@ const logoutUserInternal = async (): Promise<void> => {
 
   if (refreshTokenToRevoke && accessTokenForBackendCall) {
       try {
-          const baseUrl = apiClient.defaults.baseURL + '/api' || 'http://localhost:3000/api';
+          const baseUrl = apiClient.defaults.baseURL || 'http://localhost:3000/api';
           await axios.post( `${baseUrl}/auth/logout`, { refreshToken: refreshTokenToRevoke }, { headers: { 'Authorization': `Bearer ${accessTokenForBackendCall}` }, timeout: 4000 });
       } catch { /* Ignore logout errors */ }
   }
