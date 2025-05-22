@@ -4,7 +4,8 @@
 import React, { useEffect } from 'react';
 import {
     AppShell, Group, Text, Button, Anchor, Burger, Drawer, Stack, Divider,
-     Avatar, Menu, UnstyledButton, Box, useMantineTheme // Added MantineColor for explicit typing
+     Avatar, Menu, UnstyledButton, Box, useMantineTheme, // Added MantineColor for explicit typing
+     useMantineColorScheme
 } from '@mantine/core';
 import Link from 'next/link';
 import { useAuthStore } from '@/stores/authStore';
@@ -38,6 +39,7 @@ function HeaderContent() {
   const isMobile = useMediaQuery('(max-width: 768px)');
   const [drawerOpened, { toggle: toggleDrawer, close: closeDrawer }] = useDisclosure(false);
   const pathname = usePathname();
+  const { colorScheme } = useMantineColorScheme();
 
   useEffect(() => {
     if (drawerOpened) {
@@ -57,7 +59,7 @@ function HeaderContent() {
     : publicNavLinks;
 
   // Define hover background color based on theme for UnstyledButton
-  const menuTargetHoverBg = theme.colorScheme === 'dark' ? theme.colors.dark[5] : theme.colors.gray[1];
+  const menuTargetHoverBg = colorScheme === 'dark' ? theme.colors.dark[5] : theme.colors.gray[1];
 
 
   return (
@@ -280,13 +282,14 @@ function HeaderContent() {
 
 export function MainLayout({ children }: { children: React.ReactNode }) {
   const theme = useMantineTheme();
+  const { colorScheme } = useMantineColorScheme();
 
   // Define header styles dynamically based on theme
-  const headerBackgroundColor = theme.colorScheme === 'dark'
+  const headerBackgroundColor = colorScheme === 'dark'
     ? theme.colors.dark[7] // A dark background for dark mode
     : theme.colors.gray[0]; // A very light gray for light mode, distinguishing from pure white body
 
-  const headerBorderColor = theme.colorScheme === 'dark'
+  const headerBorderColor = colorScheme === 'dark'
     ? theme.colors.dark[5]
     : theme.colors.gray[2];
 
