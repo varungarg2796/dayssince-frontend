@@ -27,10 +27,9 @@ export default function AboutPage() {
             <Text>
               If you have any questions, feedback, or issues, please feel free to reach out via email:
             </Text>
-            <Anchor href="mailto:your.email@example.com" target="_blank" rel="noopener noreferrer">
-              your.email@example.com
+            <Anchor href="mailto:varungarg2796@gmail.com" target="_blank" rel="noopener noreferrer">
+              varungarg2796@gmail.com
             </Anchor>
-            {/* Replace with your actual email address */}
 
           </Stack>
         </Paper>

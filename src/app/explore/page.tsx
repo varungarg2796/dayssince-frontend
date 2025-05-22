@@ -81,7 +81,14 @@ export default function ExplorePage() {
     <MainLayout>
       <Container size="xl">
         <Stack gap="lg">
-          <Title order={2}>Explore Public Counters</Title>
+          <Box> {/* Wrap Title and Text in a Box for better grouping if needed */}
+            <Title order={2} ta={{ base: 'center', sm: 'left' }}> {/* Centered on mobile, left on larger */}
+                Explore Public Counters
+            </Title>
+            <Text c="dimmed" size="sm" mt={4} ta={{ base: 'center', sm: 'left' }}> {/* Centered on mobile, left on larger */}
+                Discover and browse through a variety of time counters shared by other users from around the community.
+            </Text>
+          </Box>
 
           {/* Controls Area */}
           <Group justify="space-between" gap="md">

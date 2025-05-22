@@ -7,15 +7,16 @@ import {
     Menu, useMantineTheme, ThemeIcon, Divider, Transition, Paper, useMantineColorScheme
 } from '@mantine/core';
 import { useMediaQuery, useHover } from '@mantine/hooks';
-import { Counter, Tag } from '../../types/index';
+import { Counter, Tag } from '../../types/index'; // Assuming types are in ../../types
 import {
     IconArchive, IconArchiveOff, IconPencil, IconTrash, IconShare3, IconDotsVertical,
     IconUserCircle, IconCalendar, IconClock, IconLock, IconTags, IconExternalLink
 } from '@tabler/icons-react';
 import Link from 'next/link';
+// Import the SharedTimerDisplay and its TimeDifference interface
+import { SharedTimerDisplay, TimeDifference } from './SharedTimerDisplay'; // Assuming it's in the same directory
 
-// Timer/Date Logic
-interface TimeDifference { days: number; hours: number; minutes: number; seconds: number; }
+// calculateTimeDifference is still needed here if used by this component's direct logic
 function calculateTimeDifference(startDate: Date, endDate: Date): TimeDifference {
     const differenceMs = endDate.getTime() - startDate.getTime();
     if (differenceMs < 0) return { days: 0, hours: 0, minutes: 0, seconds: 0 };
@@ -26,19 +27,19 @@ function calculateTimeDifference(startDate: Date, endDate: Date): TimeDifference
     const seconds = totalSeconds % 60;
     return { days, hours, minutes, seconds };
 }
-function TimerDisplay({ time, isArchived }: { time: TimeDifference, isArchived: boolean }) {
-    const pad = (num: number) => num.toString().padStart(2, '0');
-    const isSmallScreen = useMediaQuery('(max-width: 450px)');
-    const theme = useMantineTheme();
-    const { colorScheme } = useMantineColorScheme();
-    const primaryColor = theme.primaryColor;
-    const getGradient = () => { if (isArchived) { return { from: colorScheme === 'dark' ? theme.colors.gray[5] : theme.colors.gray[6], to: theme.colors.gray[7] }; } return { from: theme.colors[primaryColor][5], to: theme.colors[primaryColor][8] }; };
-    const NumberText = ({ children }: { children: React.ReactNode }) => (<Text size={isSmallScreen ? 'xl' : '2.6rem'} fw={700} lh={1.1} variant="gradient" gradient={getGradient()} ta="center" style={{ minWidth: isSmallScreen ? '1.5rem' : '2.5rem', textShadow: colorScheme === 'dark' ? '0 2px 4px rgba(0,0,0,0.3)' : 'none' }}> {children} </Text>);
-    const LabelText = ({ children }: { children: React.ReactNode }) => (<Text size="xs" c="dimmed" tt="uppercase" fw={500} ta="center" style={{ letterSpacing: '0.5px' }}> {children} </Text>);
-    const TimeSeparator = () => (<Text size={isSmallScreen ? "xl" : "2.2rem"} fw={300} c="dimmed" lh={1.1}>:</Text>);
-    return (<Group gap={isSmallScreen ? 'xs' : 'md'} justify="center" wrap="nowrap" my="xs"> <Stack align="center" gap={2}><NumberText>{time.days}</NumberText><LabelText>days</LabelText></Stack> <TimeSeparator /> <Stack align="center" gap={2}><NumberText>{pad(time.hours)}</NumberText><LabelText>hours</LabelText></Stack> <TimeSeparator /> <Stack align="center" gap={2}><NumberText>{pad(time.minutes)}</NumberText><LabelText>mins</LabelText></Stack> <TimeSeparator /> <Stack align="center" gap={2}><NumberText>{pad(time.seconds)}</NumberText><LabelText>secs</LabelText></Stack> </Group>);
-}
-const formatLocalDate = (dateString: string | null | undefined): string => { if (!dateString) return 'N/A'; try { return new Intl.DateTimeFormat(undefined, { year: 'numeric', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }).format(new Date(dateString)); } catch { return 'Invalid Date'; } };
+
+// Date Formatting Helper
+const formatLocalDate = (dateString: string | null | undefined): string => {
+    if (!dateString) return 'N/A';
+    try {
+        return new Intl.DateTimeFormat(undefined, {
+            year: 'numeric', month: 'short', day: 'numeric',
+            hour: 'numeric', minute: '2-digit'
+        }).format(new Date(dateString));
+    } catch {
+        return 'Invalid Date';
+    }
+};
 
 interface CounterCardProps {
     counter: Counter;
@@ -64,140 +65,172 @@ export function CounterCard({
     const isTablet = useMediaQuery('(max-width: 992px)');
     const { hovered, ref } = useHover();
 
-    const linkHref = isOwnerView ? `/counter/${counter.id}` : (counter.slug ? `/c/${counter.slug}` : '#'); // Fallback href if slug missing
+    const linkHref = isOwnerView ? `/counter/${counter.id}` : (counter.slug ? `/c/${counter.slug}` : '#');
     const canLinkPublicly = !isOwnerView && !counter.isPrivate && !!counter.slug;
-    const isLinkable = isOwnerView || canLinkPublicly; // Card is linkable if owner or public view possible
+    const isLinkable = isOwnerView || canLinkPublicly;
 
-    const getCardBorderColor = () => hovered && isLinkable ? 'var(--mantine-primary-color-filled)' : 'transparent'; // Only show border if linkable
-    const getCardStyle = () => ({ display: 'flex', flexDirection: 'column' as const, transition: 'all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1)', opacity: isArchived && isOwnerView ? 0.85 : 1, cursor: isLinkable ? 'pointer' : 'default', borderColor: getCardBorderColor(), borderWidth: '2px', position: 'relative' as const, overflow: 'visible' as const, backgroundColor: 'var(--mantine-color-body)' });
+    const getCardBorderColor = () => hovered && isLinkable ? 'var(--mantine-primary-color-filled)' : 'transparent';
+    const getCardStyle = () => ({
+        display: 'flex', flexDirection: 'column' as const,
+        transition: 'all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1)',
+        opacity: isArchived && isOwnerView ? 0.85 : 1,
+        cursor: isLinkable ? 'pointer' : 'default',
+        borderColor: getCardBorderColor(),
+        borderWidth: '2px',
+        position: 'relative' as const,
+        overflow: 'visible' as const,
+        backgroundColor: 'var(--mantine-color-body)'
+    });
 
     // Timer State
     const [currentTimeDiff, setCurrentTimeDiff] = useState<TimeDifference>({ days: 0, hours: 0, minutes: 0, seconds: 0 });
     const startDate = useMemo(() => { try { return new Date(counter.startDate); } catch { return null; } }, [counter.startDate]);
     const archivedDate = useMemo(() => { try { return counter.archivedAt ? new Date(counter.archivedAt) : null; } catch { return null; } }, [counter.archivedAt]);
-    useEffect(() => { /* Timer effect */ let intervalId: NodeJS.Timeout | null = null; if (!isArchived && startDate instanceof Date && !isNaN(startDate.getTime())) { setCurrentTimeDiff(calculateTimeDifference(startDate, new Date())); intervalId = setInterval(() => { setCurrentTimeDiff(calculateTimeDifference(startDate, new Date())); }, 1000); } return () => { if (intervalId) clearInterval(intervalId); }; }, [startDate, isArchived]);
-    const archivedTimeDiff = useMemo<TimeDifference>(() => { if (isArchived && startDate instanceof Date && !isNaN(startDate.getTime()) && archivedDate instanceof Date && !isNaN(archivedDate.getTime())) { return calculateTimeDifference(startDate, archivedDate); } return { days: 0, hours: 0, minutes: 0, seconds: 0 }; }, [isArchived, startDate, archivedDate]);
 
-    // Action Handlers
-    const handleEdit = () => isOwnerView && onEdit?.(counter);
-    const handleShare = () => onShare?.(counter);
-    const handleDelete = () => isOwnerView && onDelete?.(counter);
-    const handleToggleArchive = () => isOwnerView && onRequestToggleArchive?.(counter);
+    useEffect(() => {
+        let intervalId: NodeJS.Timeout | null = null;
+        if (!isArchived && startDate instanceof Date && !isNaN(startDate.getTime())) {
+            setCurrentTimeDiff(calculateTimeDifference(startDate, new Date()));
+            intervalId = setInterval(() => {
+                setCurrentTimeDiff(calculateTimeDifference(startDate, new Date()));
+            }, 1000);
+        }
+        return () => { if (intervalId) clearInterval(intervalId); };
+    }, [startDate, isArchived]);
 
-    // Action Buttons Configuration
-    const getActionIconProps = (color?: string) => ({ variant: "subtle" as const, size: "md", radius: "xl", color: color || (colorScheme === 'dark' ? 'gray.6' : 'gray.7'), style: { transition: 'all 0.2s ease' } });
-    const shareButton = onShare && !counter.isPrivate && counter.slug && (<Tooltip label="Copy Public Link" withArrow position="bottom" openDelay={300}><ActionIcon {...getActionIconProps('teal')} onClick={handleShare} title="Share"><IconShare3 size="1.1rem" stroke={1.5} /></ActionIcon></Tooltip>);
-    const editButton = isOwnerView && onEdit && (<Tooltip label="Edit" withArrow position="bottom" openDelay={300}><ActionIcon {...getActionIconProps(theme.primaryColor)} onClick={handleEdit} title="Edit"><IconPencil size="1.1rem" stroke={1.5} /></ActionIcon></Tooltip>);
-    const deleteButtonJsx = isOwnerView && onDelete && (<Tooltip label="Delete" withArrow position="bottom" openDelay={300}><ActionIcon {...getActionIconProps("red")} onClick={handleDelete} title="Delete"><IconTrash size="1.1rem" stroke={1.5} /></ActionIcon></Tooltip>);
-    const archiveButton = isOwnerView && onRequestToggleArchive && (<Tooltip label={isArchived ? "Unarchive" : "Archive"} withArrow position="bottom" openDelay={300}><ActionIcon {...getActionIconProps("blue")} onClick={handleToggleArchive} title={isArchived ? "Unarchive" : "Archive"}>{isArchived ? <IconArchiveOff size="1.1rem" stroke={1.5} /> : <IconArchive size="1.1rem" stroke={1.5} />}</ActionIcon></Tooltip>);
-    // End Action Buttons Configuration
+    const archivedTimeDiff = useMemo<TimeDifference>(() => {
+        if (isArchived && startDate instanceof Date && !isNaN(startDate.getTime()) && archivedDate instanceof Date && !isNaN(archivedDate.getTime())) {
+            return calculateTimeDifference(startDate, archivedDate);
+        }
+        return { days: 0, hours: 0, minutes: 0, seconds: 0 };
+    }, [isArchived, startDate, archivedDate]);
 
-    // Card Content JSX
+    // Action Handlers (preventing default link navigation if actions are on the card)
+    const handleEdit = (e: React.MouseEvent) => { e.stopPropagation(); e.preventDefault(); if (isOwnerView && onEdit) { onEdit(counter); } };
+    const handleShare = (e: React.MouseEvent) => { e.stopPropagation(); e.preventDefault(); if (onShare) { onShare(counter); } };
+    const handleDelete = (e: React.MouseEvent) => { e.stopPropagation(); e.preventDefault(); if (isOwnerView && onDelete) { onDelete(counter); } };
+    const handleToggleArchive = (e: React.MouseEvent) => { e.stopPropagation(); e.preventDefault(); if (isOwnerView && onRequestToggleArchive) { onRequestToggleArchive(counter); } };
+
+
+    const getActionIconProps = (color?: string) => ({ variant: "subtle" as const, size: "md", radius: "xl", color: color || (colorScheme === 'dark' ? theme.colors.gray[6] : theme.colors.gray[7]), style: { transition: 'all 0.2s ease' } });
+    const shareButton = onShare && !counter.isPrivate && counter.slug && (<Tooltip label="Copy Public Link" withArrow position="bottom" openDelay={300} withinPortal><ActionIcon {...getActionIconProps('teal')} onClick={handleShare} title="Share"><IconShare3 size="1.1rem" stroke={1.5} /></ActionIcon></Tooltip>);
+    const editButton = isOwnerView && onEdit && (<Tooltip label="Edit" withArrow position="bottom" openDelay={300} withinPortal><ActionIcon {...getActionIconProps(theme.primaryColor)} onClick={handleEdit} title="Edit"><IconPencil size="1.1rem" stroke={1.5} /></ActionIcon></Tooltip>);
+    const deleteButtonJsx = isOwnerView && onDelete && (<Tooltip label="Delete" withArrow position="bottom" openDelay={300} withinPortal><ActionIcon {...getActionIconProps("red")} onClick={handleDelete} title="Delete"><IconTrash size="1.1rem" stroke={1.5} /></ActionIcon></Tooltip>);
+    const archiveButton = isOwnerView && onRequestToggleArchive && (<Tooltip label={isArchived ? "Unarchive" : "Archive"} withArrow position="bottom" openDelay={300} withinPortal><ActionIcon {...getActionIconProps("blue")} onClick={handleToggleArchive} title={isArchived ? "Unarchive" : "Archive"}>{isArchived ? <IconArchiveOff size="1.1rem" stroke={1.5} /> : <IconArchive size="1.1rem" stroke={1.5} />}</ActionIcon></Tooltip>);
+
     const CardContent = (
-        <Stack justify="space-between" h="100%" gap="md" style={{ flexGrow: 1 }}>
+        <Stack justify="space-between" h="100%" gap="sm" /* Reduced gap slightly */ style={{ flexGrow: 1 }}>
             {/* Top Section */}
             <Box>
                 <Group justify="space-between" align="flex-start" wrap="nowrap" mb="xs">
-                    <Box style={{ flex: 1, minWidth: 0 }}>
-                        {/* Make name clickable if card is linkable */}
-                        <Text component="span" fw={700} size={isTablet ? "lg" : "xl"} lh={1.3} truncate="end" style={{ transition: 'color 0.2s ease' }}>
+                    <Box style={{ flex: 1, minWidth: 0, overflow: 'hidden' }}>
+                        <Text
+                          component="span"
+                          fw={700}
+                          size={isTablet ? "lg" : "xl"}
+                          lh={1.3}
+                          lineClamp={2} // Allow title to wrap to 2 lines before truncating
+                          style={{ transition: 'color 0.2s ease' }}
+                        >
                             {counter.name}
                         </Text>
                     </Box>
-                    {/* --- MODIFIED: External Link Icon (No Link Component) --- */}
                     {canLinkPublicly && (
-                        <Tooltip label="View Public Page" withArrow>
-                            {/* Removed component={Link} and href */}
-                            <ActionIcon variant="subtle" size="xs" color="gray" onClick={(e) => e.stopPropagation()} /* Stop propagation */ >
+                        <Tooltip label="View Public Page" withArrow withinPortal>
+                            {/* This ActionIcon should not trigger card link navigation if card is wrapped by Link */}
+                            <ActionIcon variant="subtle" size="xs" color="gray" onClick={(e) => e.stopPropagation()} >
                                 <IconExternalLink size="0.8rem" stroke={1.5} />
                             </ActionIcon>
                         </Tooltip>
                     )}
-                    {/* --- END MODIFICATION --- */}
                 </Group>
-                {counter.user?.username && (<Group gap={4} mb="sm"><IconUserCircle size={16} stroke={1.5} style={{ color: theme.colors[theme.primaryColor][colorScheme === 'dark' ? 4 : 6] }} /><Text size="sm" c="dimmed">by {counter.user.username}</Text></Group>)}
-                {counter.description && (<Text size="sm" c="dimmed" lineClamp={3} mb="sm" style={{ fontStyle: 'italic', lineHeight: 1.5 }}>{counter.description}</Text>)}
-                {counter.tags && counter.tags.length > 0 && (<Group gap={8} mb="sm" wrap="wrap" align="center"><ThemeIcon size="xs" color={colorScheme === 'dark' ? 'gray.6' : 'gray.6'} variant="light"><IconTags size="0.8rem" stroke={1.5} /></ThemeIcon>{counter.tags.slice(0, isMobile ? 2 : 4).map((tag: Tag) => (<Badge key={tag.id} variant="dot" size="sm" color={theme.primaryColor} radius="sm" style={{ boxShadow: '0 2px 4px rgba(0,0,0,0.05)' }}>{tag.name}</Badge>))}{counter.tags.length > (isMobile ? 2 : 4) && (<Tooltip label={counter.tags.slice(isMobile ? 2 : 4).map(t => t.name).join(', ')} withArrow><Badge variant='filled' color={theme.primaryColor} radius='sm' size="sm">+{counter.tags.length - (isMobile ? 2 : 4)}</Badge></Tooltip>)}</Group>)}
-                <Divider my="md" variant="dashed" opacity={0.6} style={{ borderColor: colorScheme === 'dark' ? theme.colors.dark[3] : theme.colors.gray[3] }} />
+                {counter.user?.username && (<Group gap={4} mb="xs" /* Reduced margin */><IconUserCircle size={16} stroke={1.5} style={{ color: theme.colors[theme.primaryColor][colorScheme === 'dark' ? 4 : 6] }} /><Text size="sm" c="dimmed">by {counter.user.username}</Text></Group>)}
+                {counter.description && (<Text size="sm" c="dimmed" lineClamp={3} mb="xs" /* Reduced margin */ style={{ fontStyle: 'italic', lineHeight: 1.5 }}>{counter.description}</Text>)}
+                {counter.tags && counter.tags.length > 0 && (<Group gap={6} /* Reduced gap */ mb="xs" wrap="wrap" align="center"><ThemeIcon size="xs" color={colorScheme === 'dark' ? 'gray.6' : 'gray.6'} variant="light"><IconTags size="0.8rem" stroke={1.5} /></ThemeIcon>{counter.tags.slice(0, isMobile ? 2 : 3).map((tag: Tag) => (<Badge key={tag.id} variant="light" /* Changed from dot for better visibility */ size="xs" /* Smaller badge */ color={theme.primaryColor} radius="sm">{tag.name}</Badge>))}{counter.tags.length > (isMobile ? 2 : 3) && (<Tooltip label={counter.tags.slice(isMobile ? 2 : 3).map(t => t.name).join(', ')} withArrow withinPortal><Badge variant='light' color={theme.primaryColor} radius='sm' size="xs">+{counter.tags.length - (isMobile ? 2 : 3)}</Badge></Tooltip>)}</Group>)}
+                <Divider my="xs" /* Reduced margin */ variant="dashed" opacity={0.6} style={{ borderColor: colorScheme === 'dark' ? theme.colors.dark[4] : theme.colors.gray[3] }} />
             </Box>
 
-            {/* Timer Section */}
-            <Paper p="md" radius="md" shadow="sm" style={{ textAlign: 'center', backgroundColor: 'var(--mantine-color-body)', position: 'relative', overflow: 'hidden' }} my="sm" withBorder>
-                <Box style={{ position: 'absolute', top: 0, left: 0, right: 0, textAlign: 'center', padding: '6px 0', }}> <Group align="center" justify="center" gap={6}> <IconClock size={14} stroke={1.5} color={colorScheme === 'dark' ? 'white' : 'black'} /> <Text size="xs" fw={600} style={{ letterSpacing: '0.5px', color: colorScheme === 'dark' ? 'white' : 'black' }}> {isArchived ? 'FINAL DURATION' : 'ELAPSED TIME'} </Text> </Group> </Box>
-                <Box pt={25}> {isArchived ? <TimerDisplay time={archivedTimeDiff} isArchived={isArchived} /> : <TimerDisplay time={currentTimeDiff} isArchived={isArchived} />} </Box>
+            {/* MODIFIED Timer Section */}
+            <Paper p="sm" radius="md" shadow="xs" style={{ textAlign: 'center', backgroundColor: 'var(--mantine-color-body)', position: 'relative', overflow: 'hidden' }} my={0} /* Reduced margin */ withBorder>
+                <Box style={{ position: 'absolute', top: 0, left: 0, right: 0, textAlign: 'center', padding: '4px 0', }}>
+                    <Group align="center" justify="center" gap={6}>
+                        <IconClock size={14} stroke={1.5} /> {/* Removed color to inherit */}
+                        <Text size="xs" fw={500} /* Slightly less bold */ c="dimmed" /* Dimmer text */>
+                            {isArchived ? 'FINAL DURATION' : 'ELAPSED TIME'}
+                        </Text>
+                    </Group>
+                </Box>
+                <Box pt={20} pb={4}> {/* Adjusted padding top/bottom */}
+                    {isArchived
+                        ? <SharedTimerDisplay time={archivedTimeDiff} isArchived={isArchived} size="default" />
+                        : <SharedTimerDisplay time={currentTimeDiff} isArchived={isArchived} size="default" />
+                    }
+                </Box>
             </Paper>
 
             {/* Bottom Section */}
-            <Box mt="auto">
-                <Divider mb="md" variant="dashed" opacity={0.6} style={{ borderColor: colorScheme === 'dark' ? theme.colors.dark[3] : theme.colors.gray[3] }} />
+            <Box mt="auto" pt="xs" /* Added padding top */>
+                <Divider mb="xs" /* Reduced margin */ variant="dashed" opacity={0.6} style={{ borderColor: colorScheme === 'dark' ? theme.colors.dark[4] : theme.colors.gray[3] }} />
                 <Group justify="space-between" align="center">
-                    <Stack gap={2}> <Group gap={4} wrap="nowrap"><IconCalendar size={14} stroke={1.5} style={{ color: theme.colors[theme.primaryColor][colorScheme === 'dark' ? 4 : 6], flexShrink: 0 }} /><Text size="xs" c="dimmed">Started: {formatLocalDate(counter.startDate)}</Text></Group> {isArchived && isOwnerView && (<Group gap={4} wrap="nowrap"><IconArchive size={14} stroke={1.5} style={{ color: theme.colors.blue[colorScheme === 'dark' ? 4 : 6], flexShrink: 0 }} /><Text size="xs" c="dimmed">Archived: {formatLocalDate(counter.archivedAt)}</Text></Group>)} </Stack>
-                    {/* Actions Group (Stop Propagation) */}
-                    <Group gap={isMobile ? 4 : 8} wrap="nowrap" style={{ flexShrink: 0 }} onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}>
-                        {isOwnerView ? (<> {archiveButton} {isMobile ? (<Menu shadow="md" width={180} position="bottom-end">
-                            <Menu.Target>
-                                <ActionIcon
-                                    variant="subtle"
-                                    size="lg"
-                                    aria-label="More actions"
-                                >
-                                    <IconDotsVertical size="1.1rem" stroke={1.5} />
-                                </ActionIcon>
-                            </Menu.Target>
-                            <Menu.Dropdown>
-                                {shareButton && (
-                                    <Menu.Item
-                                        leftSection={<IconShare3 size={14} />}
-                                        onClick={handleShare}
-                                    >
-                                        Copy Public Link
-                                    </Menu.Item>
+                    <Stack gap={0} /* Reduced gap */>
+                        <Group gap={4} wrap="nowrap">
+                            <IconCalendar size={14} stroke={1.5} style={{ color: theme.colors[theme.primaryColor][colorScheme === 'dark' ? 4 : 6], flexShrink: 0 }} />
+                            <Text size="xs" c="dimmed">Started: {formatLocalDate(counter.startDate)}</Text>
+                        </Group>
+                        {isArchived && isOwnerView && (
+                            <Group gap={4} wrap="nowrap" mt={2}>
+                                <IconArchive size={14} stroke={1.5} style={{ color: theme.colors.blue[colorScheme === 'dark' ? 4 : 6], flexShrink: 0 }} />
+                                <Text size="xs" c="dimmed">Archived: {formatLocalDate(counter.archivedAt)}</Text>
+                            </Group>
+                        )}
+                    </Stack>
+                    {/* Actions Group - onClick handlers now defined with (e: React.MouseEvent) */}
+                    <Group gap={isMobile ? 2 : 6} /* Slightly adjusted gap */ wrap="nowrap" style={{ flexShrink: 0 }}>
+                        {isOwnerView ? (
+                            <>
+                                {archiveButton}
+                                {isMobile ? (
+                                    <Menu shadow="md" width={180} position="bottom-end" withinPortal closeOnItemClick>
+                                        <Menu.Target><ActionIcon variant="subtle" size="md" radius="xl" aria-label="More actions" onClick={(e) => e.stopPropagation()}><IconDotsVertical size="1.1rem" stroke={1.5} /></ActionIcon></Menu.Target>
+                                        <Menu.Dropdown>
+                                            {shareButton && (<Menu.Item leftSection={<IconShare3 size={14} />} onClick={handleShare}>Copy Public Link</Menu.Item>)}
+                                            {editButton && (<Menu.Item leftSection={<IconPencil size={14} />} onClick={handleEdit}>Edit</Menu.Item>)}
+                                            {(editButton || shareButton) && deleteButtonJsx && (<Menu.Divider />)}
+                                            {deleteButtonJsx && (<Menu.Item color="red" leftSection={<IconTrash size={14} />} onClick={handleDelete}>Delete</Menu.Item>)}
+                                        </Menu.Dropdown>
+                                    </Menu>
+                                ) : (
+                                    <> {editButton} {shareButton} {deleteButtonJsx} </>
                                 )}
-                                {editButton && (
-                                    <Menu.Item
-                                        leftSection={<IconPencil size={14} />}
-                                        onClick={handleEdit}
-                                    >
-                                        Edit
-                                    </Menu.Item>
-                                )}
-                                {(editButton || shareButton) && deleteButtonJsx && (
-                                    <Menu.Divider />
-                                )}
-                                {deleteButtonJsx && (
-                                    <Menu.Item
-                                        color="red"
-                                        leftSection={<IconTrash size={14} />}
-                                        onClick={handleDelete}
-                                    >
-                                        Delete
-                                    </Menu.Item>
-                                )}
-                            </Menu.Dropdown>
-                        </Menu>) : (<> {editButton} {shareButton} {deleteButtonJsx} </>)} </>)
-                            : (shareButton || null)}
+                            </>
+                        ) : (shareButton || null)}
                     </Group>
                 </Group>
             </Box>
         </Stack>
     );
-    // End Card Content JSX
 
     return (
         <Transition mounted={true} transition="fade" duration={400}>
             {(styles) => (
-                <Card ref={ref} shadow={hovered ? "md" : "sm"} padding="lg" radius="lg" withBorder h="100%" style={{ ...getCardStyle(), ...styles, transform: hovered && !isMobile ? 'translateY(-5px)' : 'translateY(0)' }}>
-                    {/* Badges */}
-                    {isArchived && isOwnerView && (<Badge color="gray" variant="filled" radius="sm" size="sm" style={{ position: 'absolute', top: -10, right: 20, zIndex: 1, boxShadow: '0 2px 4px rgba(0,0,0,0.1)' }}> Archived </Badge>)}
-                    {counter.isPrivate && (<Tooltip label="Private Counter" withArrow position="top"><ThemeIcon size="xs" color={colorScheme === 'dark' ? 'gray' : 'gray'} variant="light" style={{ position: 'absolute', top: 12, right: 12, borderRadius: '50%', zIndex: 1 }}> <IconLock size="0.8rem" stroke={1.5} /> </ThemeIcon></Tooltip>)}
+                <Card
+                    ref={ref}
+                    shadow={hovered && isLinkable ? "md" : "sm"} // Only change shadow if linkable
+                    padding="md" // Standardized padding
+                    radius="lg"
+                    withBorder
+                    h="100%"
+                    style={{ ...getCardStyle(), ...styles, transform: hovered && !isMobile && isLinkable ? 'translateY(-4px)' : 'translateY(0)' }} // Subtle lift on hover if linkable
+                >
+                    {isArchived && isOwnerView && (<Badge color="gray" variant="filled" radius="sm" size="xs" style={{ position: 'absolute', top: 8, left: 8, zIndex: 1 }}> Archived </Badge>)}
+                    {counter.isPrivate && (<Tooltip label="Private Counter" withArrow position="top" withinPortal><ThemeIcon size="xs" color="gray" variant="light" style={{ position: 'absolute', top: 8, right: 8, borderRadius: '50%', zIndex: 1 }}> <IconLock size="0.8rem" stroke={1.5} /> </ThemeIcon></Tooltip>)}
 
-                    {/* Wrap content in Link only if it's linkable */}
                     {isLinkable ? (
                         <Link href={linkHref} passHref style={{ textDecoration: 'none', color: 'inherit', display: 'flex', flexDirection: 'column', height: '100%' }}>
                             {CardContent}
                         </Link>
                     ) : (
-                        CardContent // Render content directly if not linkable
+                        CardContent
                     )}
                 </Card>
             )}
