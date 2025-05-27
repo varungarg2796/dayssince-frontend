@@ -52,8 +52,8 @@ const warmAmber: MantineColorsTuple = [
 
 export const theme = createTheme({
   // Font Setup
-  fontFamily: inter.style.fontFamily, // Use font object from next/font
-  headings: { fontFamily: inter.style.fontFamily }, // Apply to headings too
+  fontFamily: "monospace", // Use font object from next/font
+  headings: { fontFamily: "monospace" }, // Apply to headings too
 
   // Color Definitions
   primaryColor: 'deepBlue', // Set alias for primary color
