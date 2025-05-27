@@ -2,9 +2,7 @@
 'use client';
 
 import { createTheme, MantineColorsTuple } from '@mantine/core';
-import { Inter } from 'next/font/google'; // Import the font
 
-const inter = Inter({ subsets: ['latin'] });
 
 // Define Color Tuples (Use https://mantine.dev/colors-generator/ for easy generation)
 // Example Deep Blue
