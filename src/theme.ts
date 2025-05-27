@@ -50,8 +50,10 @@ const warmAmber: MantineColorsTuple = [
 
 export const theme = createTheme({
   // Font Setup
-  fontFamily: "monospace", // Use font object from next/font
-  headings: { fontFamily: "monospace" }, // Apply to headings too
+  fontFamily: '"EB Garamond", "Garamond", serif',
+  headings: { 
+    fontFamily: '"EB Garamond", "Garamond", serif'
+  },
 
   // Color Definitions
   primaryColor: 'deepBlue', // Set alias for primary color
