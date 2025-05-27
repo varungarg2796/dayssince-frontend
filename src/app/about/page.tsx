@@ -4,8 +4,8 @@
 import React from 'react';
 import { MainLayout } from '@/components/Layout/MainLayout';
 import { 
-  Container, Title, Text, Stack, Anchor, Paper, Group, ThemeIcon, 
-  Badge, Box, SimpleGrid, Card, Avatar, Divider, List, Button
+  Container, Title, Text, Stack, Paper, Group, ThemeIcon, 
+  Badge, Box, SimpleGrid, Card, Divider, List, Button
 } from '@mantine/core';
 import { 
   IconHeart, IconBulb, IconUsers, IconTarget, IconMail, IconBrandGithub, 

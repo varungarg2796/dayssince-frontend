@@ -2,11 +2,11 @@
 'use client';
 
 import React from 'react';
-import { Title, Text, Stack, Button, Container, Box, SimpleGrid, ThemeIcon, Paper, Group, Badge, Divider, List, Spotlight, Grid, Card, Center, Avatar } from '@mantine/core';
+import { Title, Text, Stack, Button, Container, Box, SimpleGrid, ThemeIcon, Paper, Group, Badge, List, Card} from '@mantine/core';
 import { MainLayout } from '@/components/Layout/MainLayout';
 import { useAuthStore } from '@/stores/authStore';
 import { 
-  IconLogin, IconPlus, IconEye, IconShare, IconListSearch, IconArrowRight, 
+   IconPlus, IconEye, IconShare, IconListSearch, IconArrowRight, 
   IconHeart, IconTrophy, IconBrain, IconUsers, IconTarget, IconClock,
   IconStar, IconTrendingUp, IconCalendar, IconFlame, IconCheck,
   IconGauge, IconSparkles, IconRocket
@@ -15,7 +15,7 @@ import Link from 'next/link';
 import { useMantineTheme } from '@mantine/core';
 
 export default function LandingPage() {
-  const { isAuthenticated, user } = useAuthStore();
+  const { isAuthenticated } = useAuthStore();
   const theme = useMantineTheme();
 
   const commonButtonProps = {
