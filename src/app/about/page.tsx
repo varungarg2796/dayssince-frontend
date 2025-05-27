@@ -153,15 +153,15 @@ export default function AboutPage() {
               
               <Text size="lg" style={{ lineHeight: 1.7 }}>
                 <IconQuote size={20} style={{ verticalAlign: 'top', marginRight: 8, opacity: 0.6 }} />
-                It started with a simple question: "How long has it been since I quit smoking?" 
+                It started with a simple question: &quot;How long has it been since I quit smoking?&quot; 
                 What seemed like basic math became a daily ritual of calculation, motivation, and reflection. 
                 That small moment of curiosity sparked something bigger.
               </Text>
               
               <Text style={{ lineHeight: 1.7 }}>
-                We realized that time isn't just numbers on a clock—it's the foundation of every meaningful 
+                We realized that time isn&apos;t just numbers on a clock—it&apos;s the foundation of every meaningful 
                 transformation. Whether someone is celebrating 100 days of sobriety, marking their first 
-                year of marriage, or simply wondering how long they've been working on their dream project, 
+                year of marriage, or simply wondering how long they&apos;ve been working on their dream project, 
                 these moments deserve more than mental math.
               </Text>
               
@@ -180,7 +180,7 @@ export default function AboutPage() {
                 }}
               >
                 <Text fw={500} c="vibrantTeal.8" size="lg">
-                  "We believe that when you track what matters, you transform how you see time itself."
+                  &quot;We believe that when you track what matters, you transform how you see time itself.&quot;
                 </Text>
                 <Text size="sm" c="vibrantTeal.6" mt="xs">— The DaysSince Team</Text>
               </Box>
@@ -199,7 +199,7 @@ export default function AboutPage() {
                 </Group>
                 <Text style={{ lineHeight: 1.6, flex: 1 }}>
                   To help people find meaning in time by making every moment trackable, 
-                  every milestone memorable, and every journey shareable. We're building 
+                  every milestone memorable, and every journey shareable. We&apos;re building 
                   a world where time becomes your greatest motivator, not your biggest mystery.
                 </Text>
               </Stack>
@@ -316,10 +316,10 @@ export default function AboutPage() {
                   <ThemeIcon size={40} radius="md" variant="light" color="orange">
                     <IconCalendar size={24} />
                   </ThemeIcon>
-                  <Title order={3}>What's Next</Title>
+                  <Title order={3}>What&apos;s Next</Title>
                 </Group>
                 <Text size="sm" c="dimmed" style={{ lineHeight: 1.6, flex: 1 }}>
-                  We're constantly evolving DaysSince based on your needs. Coming soon: 
+                  We&apos;re constantly evolving DaysSince based on your needs. Coming soon: 
                   advanced analytics, milestone celebrations, team counters, mobile apps, 
                   and integrations with your favorite tools. The journey is just beginning.
                 </Text>
@@ -332,7 +332,7 @@ export default function AboutPage() {
                   size="sm"
                   leftSection={<IconRocket size={16} />}
                 >
-                  See What's Possible
+                  See What&apos;s Possible
                 </Button>
               </Stack>
             </Paper>
@@ -347,12 +347,12 @@ export default function AboutPage() {
                 <ThemeIcon size={50} radius="md" variant="light" color="vibrantTeal">
                   <IconMail size={28} />
                 </ThemeIcon>
-                <Title order={2}>Let's Connect</Title>
+                <Title order={2}>Let&apos;s Connect</Title>
               </Group>
               
               <Text size="lg" c="dimmed" maw={500}>
                 Have questions, ideas, or just want to share your DaysSince story? 
-                We'd love to hear from you. Every message helps us build something better.
+                We&apos;d love to hear from you. Every message helps us build something better.
               </Text>
 
               <Group gap="md" mt="md">
@@ -383,7 +383,7 @@ export default function AboutPage() {
 
               <Text size="sm" c="dimmed" mt="lg">
                 We typically respond within 24 hours. Your privacy is important to us—
-                we'll never share your email or spam you with updates.
+                we&apos;ll never share your email or spam you with updates.
               </Text>
             </Stack>
           </Paper>
@@ -401,7 +401,7 @@ export default function AboutPage() {
             <Stack align="center" gap="md">
               <Title order={3} c="deepBlue.8">Ready to Start Your Journey?</Title>
               <Text c="dimmed" maw={400}>
-                Join thousands of people who've discovered the power of intentional time tracking.
+                Join thousands of people who&apos;ve discovered the power of intentional time tracking.
               </Text>
               <Button
                 component={Link}

@@ -184,7 +184,7 @@ export default function LandingPage() {
                      >
                         From life-changing decisions to daily habits, from relationship milestones to personal victories—
                         <Text component="span" fw={600} c="vibrantTeal.2"> DaysSince transforms time into motivation</Text>.
-                        Track what matters, celebrate progress, and never lose sight of how far you've come.
+                        Track what matters, celebrate progress, and never lose sight of how far you&apos;ve come.
                      </Text>
 
                      {/* Stats row */}
@@ -262,7 +262,7 @@ export default function LandingPage() {
                         Turn Time Into Your Greatest Asset
                     </Title>
                     <Text size="lg" c="dimmed" maw={600} mx="auto">
-                        Whether you're building habits, celebrating milestones, or simply curious about time—
+                        Whether you&apos;re building habits, celebrating milestones, or simply curious about time—
                         DaysSince gives every moment meaning.
                     </Text>
                 </Box>
@@ -470,7 +470,7 @@ export default function LandingPage() {
                                 
                                 <Text c="dimmed" size="sm" style={{minHeight: '80px', lineHeight: 1.6}}>
                                     Make your counters public to inspire others, or browse fascinating timelines 
-                                    shared by the community. Find motivation in others' journeys and milestones.
+                                    shared by the community. Find motivation in others&apos; journeys and milestones.
                                 </Text>
                             </Stack>
                         </Paper>
@@ -538,7 +538,7 @@ export default function LandingPage() {
                                         ))}
                                     </Group>
                                     <Text style={{lineHeight: 1.6}} size="sm">
-                                        "{testimonial.text}"
+                                        &quot;{testimonial.text}&quot;
                                     </Text>
                                     <Group justify="space-between" align="center">
                                         <Text size="sm" fw={500} c="dimmed">
@@ -574,7 +574,7 @@ export default function LandingPage() {
                         Your Journey Starts Now
                     </Title>
                     <Text size="lg" c="deepBlue.1" maw={450}>
-                        Join thousands who've discovered the power of intentional time tracking. 
+                        Join thousands who&apos;ve discovered the power of intentional time tracking. 
                         Every day counts—make yours count too.
                     </Text>
                     
