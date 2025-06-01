@@ -9,9 +9,9 @@ import { Inter } from 'next/font/google';
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
 
 export const metadata = {
-  title: { template: '%s | DaysSince', default: 'DaysSince - Track Your Moments', },
+  title: { template: '%s | DaysSince', default: 'DaysSince - Track Time That Matters', },
   description: 'Track the time since important events with DaysSince...',
-  icons: { icon: '/favicon.svg' },
+  icons: { icon: '/favicon.png' },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
