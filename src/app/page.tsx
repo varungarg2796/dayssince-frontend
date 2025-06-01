@@ -8,14 +8,16 @@ import {
 import { MainLayout } from '@/components/Layout/MainLayout';
 import { useAuthStore } from '@/stores/authStore';
 import {
-    IconPlus, IconEye, IconListSearch, IconArrowRight,
+     IconPlus, IconEye, IconListSearch, IconArrowRight,
     IconHeart, IconTargetArrow, IconClock,
     IconSparkles, IconRocket, IconMoodCrazyHappy,
-    IconGauge, IconDeviceMobile, IconPalette, IconFlame, IconLock, IconTags // Added IconCalendar back
+    IconGauge, IconPalette, IconFlame, IconLock, IconTags,
+    IconRibbonHealth, IconUserShield, // Added new icons for new use cases
+    IconShare3
 } from '@tabler/icons-react';
 import Link from 'next/link';
 import { useMantineTheme } from '@mantine/core';
-// import Image from 'next/image'; // Uncomment if you use Next.js Image for placeholders
+import Image from 'next/image'; // Uncomment if you use Next.js Image for placeholders
 
 export default function LandingPage() {
   const { isAuthenticated } = useAuthStore();
@@ -31,12 +33,42 @@ export default function LandingPage() {
     { icon: IconFlame, color: theme.colors.orange[6], title: 'Build Lasting Habits', text: 'Days sober, gym streaks, learning new skills – visualize your commitment and stay motivated daily.' },
     { icon: IconRocket, color: theme.colors.blue[6], title: 'Achieve Project Goals', text: 'Monitor project timelines, celebrate launch days, and track progress since you started chasing an ambition.' },
     { icon: IconMoodCrazyHappy, color: theme.colors.teal[6], title: 'Fun, Banter & Everyday', text: "Days since your team's last win? Or that hilarious inside joke? Share a laugh and keep score!" },
+    {
+      icon: IconRibbonHealth,
+      color: theme.colors.pink[6],
+      title: 'Mark Profound Recoveries',
+      text: "Celebrate powerful health journeys, like 'Days Cancer Free' or 'Days Since ACL Surgery' or any recovery milestones. Your strength, your timeline."
+    },
+    {
+      icon: IconUserShield,
+      color: theme.colors.gray[7],
+      title: 'Track with Anonymity',
+      text: "Your privacy matters. Change your display username anytime. Considering anonymous public posts? Your control, your story."
+    },
   ];
 
   const howItWorksSteps = [
-    { icon: IconPlus, title: '1. Create Your Counter', text: "Name your event, set the start date & time. Add details, tags, and choose privacy. That's it!", imagePlaceholderText: 'UI: Creating a new counter (e.g., form modal)'},
-    { icon: IconEye, title: '2. Watch Time Unfold', text: 'See your active Counters counting up in real-time – days, hours, minutes, seconds. Clearly and beautifully.', imagePlaceholderText: 'UI: Viewing an active Counter Card with timer'},
-    { icon: IconListSearch, title: '3. Organize & Discover', text: 'Keep your dashboard organized. Make inspiring Counters public, or explore what the community is tracking.', imagePlaceholderText: 'UI: Explore page or personal dashboard view'},
+    {
+      icon: IconPlus,
+      title: '1. Create Your Counter',
+      text: "Name your event, set the start date & time. Add details, tags, and choose your privacy – keep it personal or prepare to share!",
+      imageSrc: "/images/how-it-works/step1-create.png", // <<<--- ADD IMAGE SRC
+      imageAlt: "Screenshot of creating a new DaysSince counter form"
+    },
+    {
+      icon: IconEye,
+      title: '2. Watch Time Unfold',
+      text: 'See your active Counters tick up in real-time. For public ones, you can grab a unique link to easily share your progress with anyone, anywhere.',
+      imageSrc: "/images/how-it-works/step2-view.png", // <<<--- ADD IMAGE SRC
+      imageAlt: "Screenshot of an active DaysSince counter card with timer"
+    },
+    {
+      icon: IconListSearch,
+      title: '3. Share & Discover',
+      text: "Organize your private dashboard or make inspiring Counters public. Every public Counter gets a unique, shareable URL to showcase to the world or explore what the community is tracking!",
+      imageSrc: "/images/how-it-works/step3-explore-share.png", // <<<--- ADD IMAGE SRC
+      imageAlt: "Screenshot of the DaysSince explore page showing public counters"
+    },
   ];
 
   const features = [
@@ -45,7 +77,7 @@ export default function LandingPage() {
     { icon: IconTags, title: 'Smart Organization', description: 'Categorize with tags for easy filtering.' },
     { icon: IconTargetArrow, title: 'Challenge Tracking', description: 'Set goals and monitor your progress.' },
     { icon: IconPalette, title: 'Clean & Beautiful UI', description: 'An interface that’s a joy to use.' },
-    { icon: IconDeviceMobile, title: 'Fully Responsive', description: 'Perfect experience on all devices.' },
+    { icon: IconShare3, title: 'Easy Sharing', description: 'Quickly get a shareable link for your public Counters.'},  
   ];
 
   return (
@@ -89,8 +121,9 @@ export default function LandingPage() {
                             How Many Days Into Yours?
                         </Text>
                      </Title>
-                     <Text size="xl" c={theme.colors.deepBlue[0]} maw={700} style={{lineHeight: 1.7, opacity: 0.9}}>
-                        From life-changing decisions and new habits to remembering when your team last won the cup – DaysSince helps you effortlessly track the time since any event. Visualize progress, stay motivated, cherish memories, and even settle a friendly debate!
+                     <Text size="xl" c={theme.colors.deepBlue[0]} maw={750} style={{lineHeight: 1.7, opacity: 0.9}}>
+                        From personal goals and daily habits, to major life milestones and even those fun &apos;remember whens&apos;! DaysSince helps you effortlessly track the time since <Text component="strong" fw={600} c={theme.colors.vibrantTeal[2]}>any</Text> event.
+                        Visualize progress, stay motivated, <Text component="strong" fw={600} c={theme.colors.vibrantTeal[2]}>make your Counters public to share your journey (or keep them private!)</Text>, and cherish every moment!
                      </Text>
 
                      <Group mt="xl" gap="md" justify="center">
@@ -149,7 +182,8 @@ export default function LandingPage() {
                         DaysSince is incredibly versatile. Here&apos;s how people are making time count:
                     </Text>
                 </Box>
-                <SimpleGrid cols={{ base: 1, sm: 2, md: 2, lg:4 }} spacing="xl" verticalSpacing="xl">
+                {/* Adjusted SimpleGrid to potentially show 3 columns on lg screens for 6 cards */}
+                <SimpleGrid cols={{ base: 1, sm: 2, md: 2, lg:3 }} spacing="xl" verticalSpacing="xl">
                     {useCaseCards.map((item) => (
                         <Card key={item.title} shadow="md" padding="lg" radius="lg" withBorder h="100%">
                             <Stack align="center" ta="center" h="100%" gap="md">
@@ -183,10 +217,27 @@ export default function LandingPage() {
                                         <step.icon size={30} stroke={1.8} />
                                     </ThemeIcon>
                                     <Title order={3} size="h4">{step.title}</Title>
-                                    {/* IMAGE PLACEHOLDER - Replace with actual <Image /> component when ready */}
-                                    <Box h={180} w="100%" style={{ backgroundColor: theme.colors.gray[2] , borderRadius: theme.radius.md, display: 'flex', alignItems: 'center', justifyContent: 'center', border: `1px dashed ${theme.colors.gray[4]}` }}>
-                                        <Text c="dimmed" size="sm">{step.imagePlaceholderText}</Text>
-                                        {/* Example: <Image src="/images/step1-create-form.png" alt={step.title} layout="fill" objectFit="contain" style={{borderRadius: theme.radius.md}} /> */}
+                                    {/* IMAGE IMPLEMENTATION HERE */}
+                                    <Box
+                                        pos="relative" // For Next.js Image with layout="fill"
+                                        h={320} // Set your desired height
+                                        w="120%"
+                                        style={{
+                                            borderRadius: theme.radius.md,
+                                            overflow: 'hidden', // Important for rounded corners with fill Image
+                                            border: `1px solid ${theme.colors.gray[3]}`, // Optional border for the image box
+                                            // backgroundColor: theme.colors.gray[2] // Fallback if image doesn't load
+                                        }}
+                                    >
+                                        <Image
+                                            src={step.imageSrc}
+                                            alt={step.imageAlt}
+                                            fill // Makes the image fill the parent Box
+                                            style={{ objectFit: 'cover' }} // 'cover' or 'contain'
+                                            // You can add 'priority' prop to the first image for LCP optimization
+                                            // priority={index === 0}
+                                            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw" // Helps Next.js optimize image loading
+                                        />
                                     </Box>
                                     <Text c="dimmed" size="sm" style={{minHeight: '60px'}}>{step.text}</Text>
                                 </Stack>

@@ -289,7 +289,7 @@ export default function SingleCounterPage() {
                     {!counter.isPrivate && counter.slug && sharableUrl && (
                       <Paper mt="lg" p="md" withBorder radius="md" bg={theme.colors.gray[1]}>
                         <Stack gap="xs">
-                            <Text fw={500} size="sm" c={ theme.colors.gray[3]}>
+                            <Text fw={500} size="sm" c={ theme.colors.gray[6]}>
                                 Share Public Link:
                             </Text>
                             <Group wrap="nowrap">
