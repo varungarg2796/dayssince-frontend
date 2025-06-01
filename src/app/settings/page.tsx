@@ -118,11 +118,11 @@ export default function SettingsPage() {
   return (
     <MainLayout>
       <Container size="xs" pt="xl">
-        <Title order={2} mb="lg">Settings</Title>
+        <Title order={2} mb="lg">Change Username</Title>
         <Paper shadow="xs" p="lg" withBorder>
           <form onSubmit={handleSubmit}>
             <Stack gap="md">
-              <Text fw={500} size="sm">Change Username</Text>
+              <Text fw={500} size="sm">Your power to post anonymously!!</Text>
               <TextInput
                 label="Current Username"
                 value={currentUsername}
