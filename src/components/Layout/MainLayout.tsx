@@ -162,15 +162,15 @@ function HeaderContent() {
                         </Menu.Dropdown>
                     </Menu>
                 ) : (
-                    <Button
-                        component="a"
-                        href={`${process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3000'}/api/auth/google`}
-                        variant="default"
-                        size="sm"
-                        leftSection={<IconLogin size={16} stroke={1.5} />}
-                    >
-                        Login with Google
-                    </Button>
+                   <Button
+    component="a"
+    href={`${process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3000'}/api/auth/google`}
+    variant="default"
+    size="sm"
+    leftSection={<IconLogin size={16} stroke={1.5} />}
+>
+    {isMobile ? 'Login' : 'Login with Google'}
+</Button>
                 )}
             </Group>
         </Group>
