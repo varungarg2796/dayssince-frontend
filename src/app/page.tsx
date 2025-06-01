@@ -8,12 +8,13 @@ import {
 import { MainLayout } from '@/components/Layout/MainLayout';
 import { useAuthStore } from '@/stores/authStore';
 import {
-     IconPlus, IconEye, IconListSearch, IconArrowRight,
+     IconEye, IconListSearch, IconArrowRight,
     IconHeart, IconTargetArrow, IconClock,
     IconSparkles, IconRocket, IconMoodCrazyHappy,
     IconGauge, IconPalette, IconFlame, IconLock, IconTags,
     IconRibbonHealth, IconUserShield, // Added new icons for new use cases
-    IconShare3
+    IconShare3,
+    IconCirclePlus2
 } from '@tabler/icons-react';
 import Link from 'next/link';
 import { useMantineTheme } from '@mantine/core';
@@ -49,23 +50,23 @@ export default function LandingPage() {
 
   const howItWorksSteps = [
     {
-      icon: IconPlus,
+      icon: IconCirclePlus2,
       title: '1. Create Your Counter',
-      text: "Name your event, set the start date & time. Add details, tags, and choose your privacy – keep it personal or prepare to share!",
+      text: "Name your event, set the start date & time. Add details, tags, and choose your privacy – keep it personal or prepare to share! You can turn it to a challenge counter too! Make it a 7 day challenge for a quick win, a 21 day challenge for habit building, or a 90 day challenge for a major transformation.",
       imageSrc: "/images/how-it-works/step1-create.png", // <<<--- ADD IMAGE SRC
       imageAlt: "Screenshot of creating a new DaysSince counter form"
     },
     {
       icon: IconEye,
       title: '2. Watch Time Unfold',
-      text: 'See your active Counters tick up in real-time. For public ones, you can grab a unique link to easily share your progress with anyone, anywhere.',
+      text: 'See your active Counters tick up in real-time. Stay motivated by seeing the progress of your challenge! For public ones, you can grab a unique link to easily share your progress with anyone, anywhere.',
       imageSrc: "/images/how-it-works/step2-view.png", // <<<--- ADD IMAGE SRC
       imageAlt: "Screenshot of an active DaysSince counter card with timer"
     },
     {
       icon: IconListSearch,
       title: '3. Share & Discover',
-      text: "Organize your private dashboard or make inspiring Counters public. Every public Counter gets a unique, shareable URL to showcase to the world or explore what the community is tracking!",
+      text: "If you have not made your counter private, it gets a unique, shareable URL to showcase to the world! 'Explore' page lets you discover public Counters from others, find inspiration or just enjoy the quirky counters shared by others.",
       imageSrc: "/images/how-it-works/step3-explore-share.png", // <<<--- ADD IMAGE SRC
       imageAlt: "Screenshot of the DaysSince explore page showing public counters"
     },
@@ -204,23 +205,21 @@ export default function LandingPage() {
             <Container size="lg" py={{ base: 'xl', sm: `calc(${theme.spacing.xl} * 3)`}}>
                 <Stack gap="xl">
                     <Box ta="center" mb="lg">
-                        <Title order={2} size="h1" mb="xs">Get Started in Seconds</Title>
+                        <Title order={2} size="h1" mb="xs">How it works?</Title>
                         <Text size="lg" c="dimmed" maw={600} mx="auto">
-                            Tracking time shouldn&apos;t be complicated. With DaysSince, it&apos;s beautifully simple:
+                            Tracking time shouldn&apos;t be complicated. With DaysSince, it&apos;s beautifully simple! Example-
                         </Text>
                     </Box>
                     <SimpleGrid cols={{ base: 1, md: 3 }} spacing="xl" verticalSpacing="xl">
                         {howItWorksSteps.map((step, index) => (
                             <Paper key={index} withBorder shadow="sm" radius="lg" p="xl" style={{height: '100%', backgroundColor: theme.white}}>
                                 <Stack align="center" ta="center" gap="lg">
-                                    <ThemeIcon size={60} radius={60} variant="gradient" gradient={{ from: theme.primaryColor, to: theme.colors.vibrantTeal[5] }}>
-                                        <step.icon size={30} stroke={1.8} />
-                                    </ThemeIcon>
+                                    
                                     <Title order={3} size="h4">{step.title}</Title>
                                     {/* IMAGE IMPLEMENTATION HERE */}
                                     <Box
                                         pos="relative" // For Next.js Image with layout="fill"
-                                        h={320} // Set your desired height
+                                        h={420} // Set your desired height
                                         w="120%"
                                         style={{
                                             borderRadius: theme.radius.md,
@@ -233,7 +232,7 @@ export default function LandingPage() {
                                             src={step.imageSrc}
                                             alt={step.imageAlt}
                                             fill // Makes the image fill the parent Box
-                                            style={{ objectFit: 'cover' }} // 'cover' or 'contain'
+                                            style={{ objectFit: 'contain' }} // 'cover' or 'contain'
                                             // You can add 'priority' prop to the first image for LCP optimization
                                             // priority={index === 0}
                                             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw" // Helps Next.js optimize image loading

@@ -94,10 +94,10 @@ export default function AboutPage() {
                 Have questions, feature ideas, or just want to share how you&apos;re using DaysSince?
                 We&apos;d love to hear from you.
               </Text>
-              <Group mt="md">
+              <Group mt="md" justify="center"> {/* Add justify="center" here */}
                 <Button
                   component="a"
-                  href="mailto:varungarg2796@gmail.com" // Your actual email
+                  href="mailto:varungarg2796@gmail.com"
                   variant="gradient"
                   gradient={{ from: theme.primaryColor, to: theme.colors.vibrantTeal[6] }}
                   size="lg"
@@ -108,7 +108,7 @@ export default function AboutPage() {
                 </Button>
                 <Button
                   component="a"
-                  href="https://github.com/varungarg2796/dayssince-frontend" // Replace with your actual GitHub repo link
+                  href="https://github.com/varungarg2796/dayssince-frontend"
                   target="_blank"
                   rel="noopener noreferrer"
                   variant="default"
