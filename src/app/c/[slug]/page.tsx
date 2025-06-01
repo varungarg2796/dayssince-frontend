@@ -13,16 +13,17 @@ import {
 } from '@mantine/core';
 import {
     IconAlertCircle, IconUserCircle, IconArrowLeft,
-    IconTargetArrow, IconTrophy, IconClock, IconCopy, IconCheck // Added IconCopy, IconCheck
-} from '@tabler/icons-react';
-// Removed notifications import as we are using clipboard tooltip for feedback
-// import { notifications } from '@mantine/notifications';
+    IconTargetArrow, IconTrophy, IconClock, IconCopy, IconCheck} from '@tabler/icons-react';
+// import { notifications } from '@mantine/notifications'; // Using clipboard tooltip
 import axios from 'axios';
 import { motion } from 'framer-motion';
 import { SharedTimerDisplay, TimeDifference } from '@/components/Counters/SharedTimerDisplay';
 import Confetti from 'react-confetti';
 import { useViewportSize, useClipboard } from '@mantine/hooks';
 import dayjs from 'dayjs';
+import isSameOrAfter from 'dayjs/plugin/isSameOrAfter';
+
+dayjs.extend(isSameOrAfter);
 
 // Helper function to calculate time difference
 const calculateTimeDifferenceLocal = (startDate: Date, endDate: Date): TimeDifference => {
@@ -94,14 +95,22 @@ export default function PublicCounterPage() {
 
   useEffect(() => {
     let intervalId: NodeJS.Timeout | null = null;
-    if (counter && !isArchived && startDate instanceof Date && !isNaN(startDate.getTime())) {
-      setCurrentTimeDiff(calculateTimeDifferenceLocal(startDate, new Date()));
-      intervalId = setInterval(() => {
+    if (counter && startDate instanceof Date && !isNaN(startDate.getTime())) {
+      if (!isArchived) {
         setCurrentTimeDiff(calculateTimeDifferenceLocal(startDate, new Date()));
-      }, 1000);
+        intervalId = setInterval(() => {
+          setCurrentTimeDiff(calculateTimeDifferenceLocal(startDate, new Date()));
+        }, 1000);
+      } else if (archivedDate instanceof Date && !isNaN(archivedDate.getTime())) {
+        setCurrentTimeDiff(calculateTimeDifferenceLocal(startDate, archivedDate));
+      } else {
+        setCurrentTimeDiff({ days: 0, hours: 0, minutes: 0, seconds: 0 });
+      }
+    } else {
+      setCurrentTimeDiff({ days: 0, hours: 0, minutes: 0, seconds: 0 });
     }
     return () => { if (intervalId) clearInterval(intervalId); };
-  }, [startDate, isArchived, counter]);
+  }, [startDate, isArchived, archivedDate, counter]);
 
   const finalArchivedTimeDiff = useMemo<TimeDifference>(() => {
     if (counter && isArchived && startDate instanceof Date && archivedDate instanceof Date &&
@@ -111,19 +120,27 @@ export default function PublicCounterPage() {
     return { days: 0, hours: 0, minutes: 0, seconds: 0 };
   }, [isArchived, startDate, archivedDate, counter]);
 
-  const isChallenge = counter?.isChallenge === true && counter?.challengeDurationDays && counter.challengeDurationDays > 0 && !isArchived;
+  const wasChallengeWhenArchived = counter?.isChallenge === true && counter?.challengeDurationDays && counter.challengeDurationDays > 0 && isArchived;
+  const isActiveChallenge = counter?.isChallenge === true && counter?.challengeDurationDays && counter.challengeDurationDays > 0 && !isArchived;
+
   let daysSinceChallengeStart = 0;
   let challengeProgressPercent = 0;
-  let isChallengeAchieved = false;
+  let isChallengeAchievedOnPageLoad = false; // For active challenges
+  let wasChallengeAchievedBeforeArchive = false; // For archived challenges
 
-  if (isChallenge && startDate && counter?.challengeDurationDays) {
-      daysSinceChallengeStart = dayjs().diff(dayjs(startDate), 'day');
-      challengeProgressPercent = Math.min((daysSinceChallengeStart / counter.challengeDurationDays) * 100, 100);
-      isChallengeAchieved = daysSinceChallengeStart >= counter.challengeDurationDays;
+  if (startDate && counter?.challengeDurationDays) {
+      if (isActiveChallenge) {
+          daysSinceChallengeStart = dayjs().diff(dayjs(startDate), 'day');
+          challengeProgressPercent = Math.min((daysSinceChallengeStart / counter.challengeDurationDays) * 100, 100);
+          isChallengeAchievedOnPageLoad = daysSinceChallengeStart >= counter.challengeDurationDays;
+      } else if (wasChallengeWhenArchived && archivedDate) {
+          const challengeEndDate = dayjs(startDate).add(counter.challengeDurationDays, 'day');
+          wasChallengeAchievedBeforeArchive = dayjs(archivedDate).isSameOrAfter(challengeEndDate);
+      }
   }
 
   useEffect(() => {
-    if (isChallengeAchieved && counter && !confettiHasRun) {
+    if (isChallengeAchievedOnPageLoad && counter && !confettiHasRun) {
       const confettiKey = `confetti_shown_counter_${counter.id}`;
       if (typeof window !== 'undefined') {
         if (!localStorage.getItem(confettiKey)) {
@@ -137,7 +154,7 @@ export default function PublicCounterPage() {
         }
       }
     }
-  }, [isChallengeAchieved, counter, confettiHasRun]);
+  }, [isChallengeAchievedOnPageLoad, counter, confettiHasRun]);
 
 
   const renderContent = () => {
@@ -165,6 +182,8 @@ export default function PublicCounterPage() {
       return <Text c="dimmed" ta="center" mt="xl">Counter data is unavailable. It might have been deleted or made private.</Text>;
     }
 
+    const displayTime = isArchived ? finalArchivedTimeDiff : currentTimeDiff;
+
     return (
       <motion.div
         initial={{ opacity: 0, y: 20 }}
@@ -176,7 +195,7 @@ export default function PublicCounterPage() {
                 width={windowWidth}
                 height={windowHeight}
                 recycle={false}
-                numberOfPieces={isChallengeAchieved ? 300 : 0}
+                numberOfPieces={isChallengeAchievedOnPageLoad ? 300 : 0}
                 gravity={0.1}
                 initialVelocityY={20}
                 colors={[theme.colors.deepBlue[5], theme.colors.vibrantTeal[5], theme.colors.yellow[5], theme.white]}
@@ -184,31 +203,36 @@ export default function PublicCounterPage() {
             />
         )}
 
-        <Paper shadow="lg" radius="lg" withBorder p={{base: 'md', sm: 'xl'}}> {/* Removed mb for Affix */}
-          <Stack gap="xl"> {/* Main stack gap */}
+        <Paper shadow="lg" radius="lg" withBorder p={{base: 'md', sm: 'xl'}}>
+          <Stack gap="xl">
             <Group justify="space-between" align="center">
-              <Button variant="subtle" leftSection={<IconArrowLeft size={16} />} onClick={() => router.back()} size="sm">
+              <Button variant="subtle" leftSection={<IconArrowLeft size={16} />} onClick={() => router.push('/explore')} size="sm">
                 Back to Explore
               </Button>
             </Group>
 
             <Box ta="center">
               <Group justify="center" align="center" gap="xs" mb="xs">
-                  {isChallenge && (
-                      <ThemeIcon variant="light" color={isChallengeAchieved ? "yellow" : theme.primaryColor} size="lg" radius="md">
-                          {isChallengeAchieved ? <IconTrophy size="1.4rem" /> : <IconTargetArrow size="1.4rem" />}
+                  {(isActiveChallenge || wasChallengeWhenArchived) && (
+                      <ThemeIcon variant="light"
+                                 color={(isChallengeAchievedOnPageLoad || wasChallengeAchievedBeforeArchive) ? "yellow" : theme.primaryColor}
+                                 size="lg" radius="md">
+                          {(isChallengeAchievedOnPageLoad || wasChallengeAchievedBeforeArchive) ? <IconTrophy size="1.4rem" /> : <IconTargetArrow size="1.4rem" />}
                       </ThemeIcon>
                   )}
+                  {/* Public page, so counter.isPrivate should be false if this page is accessible */}
+                  {/* If it could somehow be private and accessible, you'd add a lock icon */}
                   <Title order={2}>{counter.name}</Title>
               </Group>
-              {isChallenge && counter.challengeDurationDays && (
+              {(isActiveChallenge || wasChallengeWhenArchived) && counter.challengeDurationDays && (
                 <Text size="sm" c="dimmed" fs="italic">
-                    A {counter.challengeDurationDays}-Day Challenge
-                    {isChallengeAchieved && " - Completed!"}
+                    {counter.challengeDurationDays}-Day Challenge
+                    {isArchived && (wasChallengeAchievedBeforeArchive ? " (Completed Before Archive)" : " (Incomplete Before Archive)")}
+                    {!isArchived && isChallengeAchievedOnPageLoad && " - Completed!"}
                 </Text>
               )}
               {counter.user?.username && (
-                <Group gap={4} mt={isChallenge ? 'xs': 5} justify="center">
+                <Group gap={4} mt={(isActiveChallenge || wasChallengeWhenArchived) ? 'xs': 5} justify="center">
                   <IconUserCircle size={16} />
                   <Text size="sm" c="dimmed">by {counter.user.username}</Text>
                 </Group>
@@ -225,7 +249,7 @@ export default function PublicCounterPage() {
               </Group>
             )}
 
-            {isChallenge && !isArchived && counter.challengeDurationDays && (
+            {isActiveChallenge && counter.challengeDurationDays && (
                 <Box my="md">
                     <Group justify="space-between" mb={4}>
                         <Text size="xs" fw={500} c="dimmed">Challenge Progress:</Text>
@@ -233,8 +257,8 @@ export default function PublicCounterPage() {
                             {daysSinceChallengeStart >= 0 ? Math.min(daysSinceChallengeStart, counter.challengeDurationDays) : 0} / {counter.challengeDurationDays} Days
                         </Text>
                     </Group>
-                    <Progress value={challengeProgressPercent} size="md" radius="sm" striped animated={!isChallengeAchieved && challengeProgressPercent < 100} color={isChallengeAchieved ? "yellow" : theme.primaryColor} />
-                    {isChallengeAchieved && (
+                    <Progress value={challengeProgressPercent} size="md" radius="sm" striped animated={!isChallengeAchievedOnPageLoad && challengeProgressPercent < 100} color={isChallengeAchievedOnPageLoad ? "yellow" : theme.primaryColor} />
+                    {isChallengeAchievedOnPageLoad && (
                         <Text ta="center" mt="xs" size="sm" fw={500} color="yellow.7">
                             Congratulations! Challenge Completed! <IconTrophy size={16} style={{verticalAlign: 'bottom'}}/>
                         </Text>
@@ -253,11 +277,20 @@ export default function PublicCounterPage() {
                     {isArchived ? 'Final Duration' : 'Time Elapsed Since Event'}
                 </Text>
                 <SharedTimerDisplay
-                    time={isArchived ? finalArchivedTimeDiff : currentTimeDiff}
+                    time={displayTime}
                     isArchived={isArchived}
                     size="large"
                 />
-                {isArchived && (
+                {wasChallengeWhenArchived && counter.challengeDurationDays && (
+                    <Text ta="center" size="xs" c="dimmed" mt="sm">
+                        This was a {counter.challengeDurationDays}-day challenge.
+                        {wasChallengeAchievedBeforeArchive
+                            ? <Text span color="green" fw={500}> It was completed before archiving.</Text>
+                            : <Text span color="orange" fw={500}> It was not completed before archiving.</Text>
+                        }
+                    </Text>
+                )}
+                {isArchived && !wasChallengeWhenArchived && (
                     <Text ta="center" size="xs" c="dimmed" mt="sm">
                       Archived on {formatLocalDate(counter.archivedAt)}
                     </Text>
@@ -267,12 +300,13 @@ export default function PublicCounterPage() {
 
             <Text size="sm" c="dimmed">Event Started: {formatLocalDate(counter.startDate)}</Text>
 
-            {/* --- Shareable URL Section Integrated Here --- */}
-            {!counter.isPrivate && counter.slug && sharableUrl && (
+            {/* Shareable URL Section Integrated Here */}
+            {/* On a public page, counter.isPrivate should be false. We ensure slug & URL are set. */}
+            {sharableUrl && (
               <Paper mt="lg" p="md" withBorder radius="md" bg={theme.colors.gray[1]}>
                 <Stack gap="xs">
-                    <Text fw={500} size="sm" c={theme.colors.dark[2]}>
-                        Share this Counter:
+                    <Text fw={500} size="sm" c={ theme.colors.dark[2]}>
+                        Share this Public Counter:
                     </Text>
                     <Group wrap="nowrap">
                         <TextInput
@@ -300,7 +334,7 @@ export default function PublicCounterPage() {
                 </Stack>
               </Paper>
             )}
-            {/* --- END Shareable URL Section --- */}
+            {/* END Shareable URL Section */}
 
           </Stack>
         </Paper>
@@ -313,7 +347,6 @@ export default function PublicCounterPage() {
       <Container size="md" py="xl">
         {renderContent()}
       </Container>
-      {/* Affix component is removed as requested */}
     </MainLayout>
   );
 }
