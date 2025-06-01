@@ -150,7 +150,7 @@ export function CounterCard({
                     radius="md"
                     leftSection={isChallengeAchieved ? <IconTrophy size={12} /> : <IconTargetArrow size={12} />}
                 >
-                    {isChallengeAchieved ? 'Challenge Complete!' : `${counter.challengeDurationDays}d Challenge`}
+                    {isChallengeAchieved ? 'Challenge Complete!' : `${counter.challengeDurationDays}day Challenge`}
                 </Badge>
             );
         }
