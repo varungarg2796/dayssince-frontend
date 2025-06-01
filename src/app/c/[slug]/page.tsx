@@ -8,21 +8,20 @@ import { fetchCounterBySlugPublic } from '@/lib/apiClient';
 import { Counter } from '@/types';
 import { MainLayout } from '@/components/Layout/MainLayout';
 import {
-  Container, Title, Text, Loader, Alert, Stack, Group, Paper, Badge, Box, ActionIcon, Tooltip, Button,
-  Center, Progress,
-  useMantineTheme,
-  ThemeIcon // Ensure ThemeIcon is imported if used
+  Container, Title, Text, Loader, Alert, Stack, Group, Paper, Badge, Box, Tooltip, Button,
+  Center, Progress, useMantineTheme, ThemeIcon, TextInput // Added TextInput
 } from '@mantine/core';
 import {
-    IconAlertCircle, IconUserCircle, IconShare3, IconArrowLeft,
-    IconTargetArrow, IconTrophy, IconClock, // Added IconLock for consistency if needed
+    IconAlertCircle, IconUserCircle, IconArrowLeft,
+    IconTargetArrow, IconTrophy, IconClock, IconCopy, IconCheck // Added IconCopy, IconCheck
 } from '@tabler/icons-react';
-import { notifications } from '@mantine/notifications';
+// Removed notifications import as we are using clipboard tooltip for feedback
+// import { notifications } from '@mantine/notifications';
 import axios from 'axios';
 import { motion } from 'framer-motion';
 import { SharedTimerDisplay, TimeDifference } from '@/components/Counters/SharedTimerDisplay';
 import Confetti from 'react-confetti';
-import { useViewportSize } from '@mantine/hooks'; // Changed from useWindowSize for consistency with Mantine
+import { useViewportSize, useClipboard } from '@mantine/hooks';
 import dayjs from 'dayjs';
 
 // Helper function to calculate time difference
@@ -53,11 +52,14 @@ export default function PublicCounterPage() {
   const params = useParams();
   const router = useRouter();
   const theme = useMantineTheme();
-  const { width: windowWidth, height: windowHeight } = useViewportSize(); // Using useViewportSize
+  const { width: windowWidth, height: windowHeight } = useViewportSize();
   const slug = typeof params?.slug === 'string' ? params.slug : null;
 
   const [showConfetti, setShowConfetti] = useState(false);
-  const [confettiHasRun, setConfettiHasRun] = useState(false); // To track if confetti ran for this session/load
+  const [confettiHasRun, setConfettiHasRun] = useState(false);
+  const [sharableUrl, setSharableUrl] = useState('');
+
+  const clipboard = useClipboard({ timeout: 2000 });
 
   const { data: counter, isLoading, error, isError, isFetching } = useQuery<Counter, Error>({
     queryKey: ['publicCounter', slug],
@@ -72,6 +74,13 @@ export default function PublicCounterPage() {
     },
     staleTime: 1000 * 60 * 2
   });
+
+  useEffect(() => {
+    if (counter && counter.slug && typeof window !== 'undefined') {
+      setSharableUrl(`${window.location.origin}/c/${counter.slug}`);
+    }
+  }, [counter]);
+
 
   const isArchived = !!counter?.archivedAt;
   const [currentTimeDiff, setCurrentTimeDiff] = useState<TimeDifference>({ days: 0, hours: 0, minutes: 0, seconds: 0 });
@@ -114,34 +123,22 @@ export default function PublicCounterPage() {
   }
 
   useEffect(() => {
-    if (isChallengeAchieved && counter && !confettiHasRun) { // Only run if confetti hasn't run this session
+    if (isChallengeAchieved && counter && !confettiHasRun) {
       const confettiKey = `confetti_shown_counter_${counter.id}`;
-      if (typeof window !== 'undefined') { // Ensure localStorage is available
+      if (typeof window !== 'undefined') {
         if (!localStorage.getItem(confettiKey)) {
-          console.log(`Confetti: Triggering for counter ${counter.id}`);
           setShowConfetti(true);
-          localStorage.setItem(confettiKey, 'true'); // Mark as shown for this browser
-          setConfettiHasRun(true); // Mark as run for this component instance/session
-          const timer = setTimeout(() => setShowConfetti(false), 7000); // Confetti duration
+          localStorage.setItem(confettiKey, 'true');
+          setConfettiHasRun(true);
+          const timer = setTimeout(() => setShowConfetti(false), 7000);
           return () => clearTimeout(timer);
         } else {
-          console.log(`Confetti: Already shown for counter ${counter.id} in a previous session.`);
-          setConfettiHasRun(true); // Mark as run for this session if already in localStorage
+          setConfettiHasRun(true);
         }
       }
     }
-  }, [isChallengeAchieved, counter, confettiHasRun]); // Dependencies for confetti effect
+  }, [isChallengeAchieved, counter, confettiHasRun]);
 
-  const handleShare = () => {
-    if (!counter?.slug) return;
-    const shareUrl = `${window.location.origin}/c/${counter.slug}`;
-    navigator.clipboard.writeText(shareUrl)
-      .then(() => notifications.show({ title: 'Link Copied!', message: 'Link to this page copied to clipboard.', color: 'teal', autoClose: 3000 }))
-      .catch(err => {
-        notifications.show({ title: 'Error', message: 'Could not copy link.', color: 'red' });
-        console.error('Failed to copy share link:', err);
-      });
-  };
 
   const renderContent = () => {
     if (isLoading || (isFetching && !counter && !error)) {
@@ -174,28 +171,25 @@ export default function PublicCounterPage() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, ease: 'easeOut' }}
       >
-        {/* --- CONFETTI COMPONENT ADDED HERE --- */}
         {showConfetti && (
             <Confetti
                 width={windowWidth}
                 height={windowHeight}
-                recycle={false} // Stops after initial burst
-                numberOfPieces={isChallengeAchieved ? 300 : 0} // Only show pieces if achieved
+                recycle={false}
+                numberOfPieces={isChallengeAchieved ? 300 : 0}
                 gravity={0.1}
                 initialVelocityY={20}
                 colors={[theme.colors.deepBlue[5], theme.colors.vibrantTeal[5], theme.colors.yellow[5], theme.white]}
-                style={{zIndex: 9999}} // Ensure it's on top
+                style={{zIndex: 9999}}
             />
         )}
-        {/* --- END CONFETTI --- */}
 
-        <Paper shadow="lg" radius="lg" withBorder p={{base: 'md', sm: 'xl'}}>
-          <Stack gap="lg">
+        <Paper shadow="lg" radius="lg" withBorder p={{base: 'md', sm: 'xl'}}> {/* Removed mb for Affix */}
+          <Stack gap="xl"> {/* Main stack gap */}
             <Group justify="space-between" align="center">
               <Button variant="subtle" leftSection={<IconArrowLeft size={16} />} onClick={() => router.back()} size="sm">
                 Back to Explore
               </Button>
-              {/* Share button could also go here if preferred */}
             </Group>
 
             <Box ta="center">
@@ -271,16 +265,43 @@ export default function PublicCounterPage() {
               </Paper>
             </motion.div>
 
-            <Group justify="space-between" align="center" mt="md">
-              <Text size="sm" c="dimmed">Event Started: {formatLocalDate(counter.startDate)}</Text>
-              {!counter.isPrivate && counter.slug && (
-                <Tooltip label="Copy Link to Counter" withArrow withinPortal>
-                  <ActionIcon variant="light" size="lg" onClick={handleShare} radius="md" color="blue">
-                    <IconShare3 size="1.1rem" stroke={1.5} />
-                  </ActionIcon>
-                </Tooltip>
-              )}
-            </Group>
+            <Text size="sm" c="dimmed">Event Started: {formatLocalDate(counter.startDate)}</Text>
+
+            {/* --- Shareable URL Section Integrated Here --- */}
+            {!counter.isPrivate && counter.slug && sharableUrl && (
+              <Paper mt="lg" p="md" withBorder radius="md" bg={theme.colors.gray[1]}>
+                <Stack gap="xs">
+                    <Text fw={500} size="sm" c={theme.colors.dark[2]}>
+                        Share this Counter:
+                    </Text>
+                    <Group wrap="nowrap">
+                        <TextInput
+                            value={sharableUrl}
+                            readOnly
+                            variant="filled"
+                            radius="sm"
+                            style={{ flexGrow: 1 }}
+                            aria-label="Sharable counter URL"
+                            onClick={(e) => (e.target as HTMLInputElement).select()}
+                        />
+                        <Tooltip label={clipboard.copied ? 'Link Copied!' : 'Copy Link'} color={clipboard.copied ? 'teal' : undefined} withArrow position="top" withinPortal>
+                        <Button
+                            variant={clipboard.copied ? "filled" : "light"}
+                            onClick={() => clipboard.copy(sharableUrl)}
+                            aria-label="Copy counter URL to clipboard"
+                            color={clipboard.copied ? 'teal' : theme.primaryColor}
+                            px="sm"
+                            leftSection={clipboard.copied ? <IconCheck size={18} /> : <IconCopy size={18} />}
+                        >
+                            {clipboard.copied ? 'Copied' : 'Copy'}
+                        </Button>
+                        </Tooltip>
+                    </Group>
+                </Stack>
+              </Paper>
+            )}
+            {/* --- END Shareable URL Section --- */}
+
           </Stack>
         </Paper>
       </motion.div>
@@ -292,6 +313,7 @@ export default function PublicCounterPage() {
       <Container size="md" py="xl">
         {renderContent()}
       </Container>
+      {/* Affix component is removed as requested */}
     </MainLayout>
   );
 }

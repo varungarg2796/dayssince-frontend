@@ -2,98 +2,50 @@
 'use client';
 
 import React from 'react';
-import { Title, Text, Stack, Button, Container, Box, SimpleGrid, ThemeIcon, Paper, Group, Badge, List, Card} from '@mantine/core';
+import {
+    Title, Text, Stack, Button, Container, Box, SimpleGrid, ThemeIcon, Paper, Group, Badge, Card
+} from '@mantine/core';
 import { MainLayout } from '@/components/Layout/MainLayout';
 import { useAuthStore } from '@/stores/authStore';
-import { 
-   IconPlus, IconEye, IconShare, IconListSearch, IconArrowRight, 
-  IconHeart, IconTrophy, IconBrain, IconUsers, IconTarget, IconClock,
-  IconStar, IconTrendingUp, IconCalendar, IconFlame, IconCheck,
-  IconGauge, IconSparkles, IconRocket
+import {
+    IconPlus, IconEye, IconListSearch, IconArrowRight,
+    IconHeart, IconTargetArrow, IconClock,
+    IconSparkles, IconRocket, IconMoodCrazyHappy,
+    IconGauge, IconDeviceMobile, IconPalette, IconFlame, IconLock, IconTags // Added IconCalendar back
 } from '@tabler/icons-react';
 import Link from 'next/link';
 import { useMantineTheme } from '@mantine/core';
+// import Image from 'next/image'; // Uncomment if you use Next.js Image for placeholders
 
 export default function LandingPage() {
   const { isAuthenticated } = useAuthStore();
   const theme = useMantineTheme();
 
   const commonButtonProps = {
-    size: "lg" as const,
     radius: "xl" as const,
     mt: "lg" as const,
   };
 
-  const useCases = [
-    {
-      icon: IconHeart,
-      color: 'red',
-      title: 'Life Milestones',
-      description: 'Anniversary dates, relationships, life-changing moments',
-      examples: ['Days since we got married', 'Time since my child was born', 'Months since I moved to this city']
-    },
-    {
-      icon: IconTrophy,
-      color: 'orange',
-      title: 'Personal Achievements',
-      description: 'Track your victories and maintain momentum',
-      examples: ['Days sober/smoke-free', 'Gym streak counter', 'Learning new skills journey']
-    },
-    {
-      icon: IconBrain,
-      color: 'blue',
-      title: 'Curiosity & Memory',
-      description: 'Remember important dates and satisfy your curiosity',
-      examples: ['Historic events timeline', 'Project start dates', 'When did that happen?']
-    },
-    {
-      icon: IconUsers,
-      color: 'green',
-      title: 'Community & Sharing',
-      description: 'Share progress and discover others\' journeys',
-      examples: ['Public challenges', 'Team project launches', 'Inspiring milestones']
-    }
+  const useCaseCards = [
+    { icon: IconHeart, color: theme.colors.red[6], title: 'Cherish Life Milestones', text: 'Track anniversaries, relationship beginnings, births, moves – every significant life event made memorable.' },
+    { icon: IconFlame, color: theme.colors.orange[6], title: 'Build Lasting Habits', text: 'Days sober, gym streaks, learning new skills – visualize your commitment and stay motivated daily.' },
+    { icon: IconRocket, color: theme.colors.blue[6], title: 'Achieve Project Goals', text: 'Monitor project timelines, celebrate launch days, and track progress since you started chasing an ambition.' },
+    { icon: IconMoodCrazyHappy, color: theme.colors.teal[6], title: 'Fun, Banter & Everyday', text: "Days since your team's last win? Or that hilarious inside joke? Share a laugh and keep score!" },
+  ];
+
+  const howItWorksSteps = [
+    { icon: IconPlus, title: '1. Create Your Counter', text: "Name your event, set the start date & time. Add details, tags, and choose privacy. That's it!", imagePlaceholderText: 'UI: Creating a new counter (e.g., form modal)'},
+    { icon: IconEye, title: '2. Watch Time Unfold', text: 'See your active Counters counting up in real-time – days, hours, minutes, seconds. Clearly and beautifully.', imagePlaceholderText: 'UI: Viewing an active Counter Card with timer'},
+    { icon: IconListSearch, title: '3. Organize & Discover', text: 'Keep your dashboard organized. Make inspiring Counters public, or explore what the community is tracking.', imagePlaceholderText: 'UI: Explore page or personal dashboard view'},
   ];
 
   const features = [
-    {
-      icon: IconClock,
-      title: 'Precise Time Tracking',
-      description: 'Down to the second accuracy with beautiful, real-time displays'
-    },
-    {
-      icon: IconTarget,
-      title: 'Smart Organization',
-      description: 'Tag, categorize, and organize your counters exactly how you want'
-    },
-    {
-      icon: IconUsers,
-      title: 'Public & Private',
-      description: 'Keep personal milestones private or share inspiring journeys publicly'
-    },
-    {
-      icon: IconTrendingUp,
-      title: 'Visual Progress',
-      description: 'See your time investments grow with intuitive, motivating displays'
-    }
-  ];
-
-  const testimonials = [
-    {
-      text: "Seeing my 'days sober' counter grow daily gives me incredible motivation to keep going.",
-      author: "Sarah M.",
-      badge: "365+ Days"
-    },
-    {
-      text: "I love tracking our project milestones. It's amazing to see how far we've come!",
-      author: "Dev Team Lead",
-      badge: "Team User"
-    },
-    {
-      text: "Perfect for remembering all those important dates I used to forget. Simple and beautiful.",
-      author: "Mike R.",
-      badge: "Memory Keeper"
-    }
+    { icon: IconClock, title: 'Real-time Precision', description: 'Track time down to the second.' },
+    { icon: IconLock, title: 'You Control Privacy', description: 'Keep Counters private or share publicly.' },
+    { icon: IconTags, title: 'Smart Organization', description: 'Categorize with tags for easy filtering.' },
+    { icon: IconTargetArrow, title: 'Challenge Tracking', description: 'Set goals and monitor your progress.' },
+    { icon: IconPalette, title: 'Clean & Beautiful UI', description: 'An interface that’s a joy to use.' },
+    { icon: IconDeviceMobile, title: 'Fully Responsive', description: 'Perfect experience on all devices.' },
   ];
 
   return (
@@ -101,124 +53,56 @@ export default function LandingPage() {
         {/* Hero Section */}
         <Box
           style={{
-            background: `linear-gradient(135deg, ${theme.colors.deepBlue[8]} 0%, ${theme.colors.deepBlue[6]} 40%, ${theme.colors.vibrantTeal[7]} 100%)`,
+            background: `linear-gradient(145deg, ${theme.colors.deepBlue[8]} 0%, ${theme.colors.deepBlue[6]} 40%, ${theme.colors.vibrantTeal[7]} 100%)`,
             color: theme.white,
-            minHeight: 'calc(85vh - 60px)',
-            paddingTop: `calc(${theme.spacing.xl} * 4)`,
+            minHeight: 'calc(80vh - 60px)',
+            paddingTop: `calc(${theme.spacing.xl} * 3)`,
             paddingBottom: `calc(${theme.spacing.xl} * 4)`,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
             position: 'relative',
-            overflow: 'hidden'
+            overflow: 'hidden',
           }}
         >
-            {/* Decorative elements */}
-            <Box
-              style={{
-                position: 'absolute',
-                top: '10%',
-                right: '10%',
-                width: '200px',
-                height: '200px',
-                borderRadius: '50%',
-                background: `radial-gradient(circle, ${theme.colors.vibrantTeal[4]}20 0%, transparent 70%)`,
-                opacity: 0.6
-              }}
-            />
-            <Box
-              style={{
-                position: 'absolute',
-                bottom: '15%',
-                left: '5%',
-                width: '150px',
-                height: '150px',
-                borderRadius: '50%',
-                background: `radial-gradient(circle, ${theme.colors.deepBlue[4]}30 0%, transparent 70%)`,
-                opacity: 0.4
-              }}
-            />
+          <Box component="span" style={{ position: 'absolute', top: '10%', left: '5%', width: 200, height: 200, borderRadius: '50%', backgroundColor: 'rgba(67, 208, 208, 0.1)', filter: 'blur(50px)' }} />
+          <Box component="span" style={{ position: 'absolute', bottom: '15%', right: '10%', width: 250, height: 250, borderRadius: '50%', backgroundColor: 'rgba(45, 121, 247, 0.15)', filter: 'blur(60px)' }} />
 
-            <Container size="lg">
+            <Container size="lg" style={{ zIndex: 1, position: 'relative' }}>
                  <Stack align="center" gap="xl" ta="center">
-                     <Badge 
-                        size="lg" 
-                        variant="light" 
-                        color="vibrantTeal" 
+                     <Badge
+                        size="xl"
+                        variant="filled"
+                        color="rgba(255, 255, 255, 0.1)"
                         radius="xl"
-                        leftSection={<IconSparkles size={16} />}
+                        styles={{root: {backdropFilter: 'blur(10px)'}, label: {color: theme.colors.vibrantTeal[2], fontWeight: 600}}}
+                        leftSection={<IconSparkles size={18} style={{color: theme.colors.vibrantTeal[3]}}/>}
                      >
                         Track Time That Matters
                      </Badge>
-                     
                      <Title
                         order={1}
-                        style={{ 
-                          fontSize: 'clamp(3rem, 8vw, 5rem)', 
-                          lineHeight: 1.1, 
-                          fontWeight: 900,
-                          textShadow: '0 4px 20px rgba(0,0,0,0.3)'
-                        }}
+                        style={{ fontSize: 'clamp(2.8rem, 7vw, 4.5rem)', lineHeight: 1.15, fontWeight: 800 }}
                       >
-                        Every Moment Has
-                        <Text 
-                          component="span" 
-                          inherit 
-                          variant="gradient" 
-                          gradient={{ from: theme.colors.vibrantTeal[3], to: theme.colors.vibrantTeal[5] }}
-                          style={{ display: 'block', marginTop: '0.2em' }}
-                        >
-                             a Story to Tell
+                        Every Moment Has a Story.
+                        <Text component="span" inherit variant="gradient" gradient={{ from: theme.colors.vibrantTeal[3], to: theme.colors.cyan[4] }} style={{display: 'block', marginTop: '0.1em'}}>
+                            How Many Days Into Yours?
                         </Text>
                      </Title>
-                     
-                     <Text 
-                        size="xl" 
-                        c="deepBlue.0" 
-                        maw={750} 
-                        style={{
-                          lineHeight: 1.7,
-                          fontSize: 'clamp(1.1rem, 2.5vw, 1.3rem)',
-                          textShadow: '0 2px 10px rgba(0,0,0,0.2)'
-                        }}
-                     >
-                        From life-changing decisions to daily habits, from relationship milestones to personal victories—
-                        <Text component="span" fw={600} c="vibrantTeal.2"> DaysSince transforms time into motivation</Text>.
-                        Track what matters, celebrate progress, and never lose sight of how far you&apos;ve come.
+                     <Text size="xl" c={theme.colors.deepBlue[0]} maw={700} style={{lineHeight: 1.7, opacity: 0.9}}>
+                        From life-changing decisions and new habits to remembering when your team last won the cup – DaysSince helps you effortlessly track the time since any event. Visualize progress, stay motivated, cherish memories, and even settle a friendly debate!
                      </Text>
 
-                     {/* Stats row */}
-                     <Group gap="xl" mt="lg">
-                        <Stack align="center" gap={4}>
-                          <Text size="xl" fw={700} c="vibrantTeal.3">10,000+</Text>
-                          <Text size="sm" c="deepBlue.2">Milestones Tracked</Text>
-                        </Stack>
-                        <Stack align="center" gap={4}>
-                          <Text size="xl" fw={700} c="vibrantTeal.3">2,500+</Text>
-                          <Text size="sm" c="deepBlue.2">Active Users</Text>
-                        </Stack>
-                        <Stack align="center" gap={4}>
-                          <Text size="xl" fw={700} c="vibrantTeal.3">99.9%</Text>
-                          <Text size="sm" c="deepBlue.2">Uptime</Text>
-                        </Stack>
-                     </Group>
-
-                     {/* CTA Buttons */}
-                     <Group mt="xl" gap="md" style={{ flexWrap: 'wrap', justifyContent: 'center' }}>
+                     <Group mt="xl" gap="md" justify="center">
                         {!isAuthenticated ? (
                             <Button
                                 component="a"
                                 href={`${process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3000'}/api/auth/google`}
                                 variant="white"
                                 color={theme.primaryColor}
-                                leftSection={<IconRocket size={20} stroke={1.8} />}
-                                {...commonButtonProps}
+                                leftSection={<IconRocket size={22} stroke={1.8} />}
                                 size="xl"
-                                style={{
-                                  boxShadow: '0 8px 32px rgba(0,0,0,0.2)',
-                                  transform: 'translateY(0px)',
-                                  transition: 'all 0.3s ease'
-                                }}
+                                {...commonButtonProps}
                             >
                                 Start Your Journey Free
                             </Button>
@@ -228,11 +112,11 @@ export default function LandingPage() {
                                 href="/home"
                                 variant="white"
                                 color={theme.primaryColor}
-                                leftSection={<IconGauge size={20} stroke={1.5} />}
-                                {...commonButtonProps}
+                                leftSection={<IconGauge size={22} stroke={1.5} />}
                                 size="xl"
+                                {...commonButtonProps}
                             >
-                                View My Counters
+                                Go to My Counters
                             </Button>
                         )}
                         <Button
@@ -240,64 +124,40 @@ export default function LandingPage() {
                             href="/explore"
                             variant="outline"
                             color="white"
-                            leftSection={<IconListSearch size={20} stroke={1.5} />}
-                            {...commonButtonProps}
+                            leftSection={<IconListSearch size={22} stroke={1.5} />}
                             size="xl"
+                            {...commonButtonProps}
                         >
                             Explore Community
                         </Button>
                      </Group>
+                      <Text size="xs" c={theme.colors.deepBlue[2]} mt="sm" style={{opacity: 0.7}}>
+                          Join thousands already marking their moments!
+                      </Text>
                  </Stack>
              </Container>
         </Box>
 
-        {/* Use Cases Section */}
-        <Container size="xl" py={{ base: 'xl', sm: `calc(${theme.spacing.xl} * 3)`}}>
+        {/* Why DaysSince? / Use Cases Section */}
+        <Container size="lg" py={{ base: 'xl', sm: `calc(${theme.spacing.xl} * 3)`}}>
             <Stack gap="xl">
-                <Box ta="center" mb="xl">
-                    <Badge size="lg" variant="light" color="deepBlue" radius="xl" mb="md">
-                        Why People Love DaysSince
-                    </Badge>
-                    <Title order={2} size="h1" mb="md">
-                        Turn Time Into Your Greatest Asset
+                <Box ta="center" mb="lg">
+                    <Title order={2} size="h1" mb="xs">
+                        Unlock Your Timeline: <Text component="span" variant="gradient" gradient={{from: theme.primaryColor, to: theme.colors.vibrantTeal[5]}} inherit>What Will You Track?</Text>
                     </Title>
                     <Text size="lg" c="dimmed" maw={600} mx="auto">
-                        Whether you&apos;re building habits, celebrating milestones, or simply curious about time—
-                        DaysSince gives every moment meaning.
+                        DaysSince is incredibly versatile. Here&apos;s how people are making time count:
                     </Text>
                 </Box>
-
-                <SimpleGrid
-                    cols={{ base: 1, sm: 2, lg: 4 }}
-                    spacing="lg"
-                    verticalSpacing="lg"
-                >
-                    {useCases.map((useCase, index) => (
-                        <Card key={index} shadow="sm" padding="lg" radius="lg" withBorder h="100%">
-                            <Stack gap="md" h="100%">
-                                <Group gap="sm">
-                                    <ThemeIcon 
-                                        size={40} 
-                                        radius="md" 
-                                        variant="light" 
-                                        color={useCase.color}
-                                    >
-                                        <useCase.icon size={24} stroke={1.5} />
-                                    </ThemeIcon>
-                                    <Title order={4} size="h5">{useCase.title}</Title>
-                                </Group>
-                                
-                                <Text size="sm" c="dimmed" style={{flexGrow: 1}}>
-                                    {useCase.description}
-                                </Text>
-                                
-                                <List size="xs" spacing={4} c="dimmed">
-                                    {useCase.examples.map((example, i) => (
-                                        <List.Item key={i} icon={<IconCheck size={12} stroke={2} color={theme.colors[useCase.color][6]} />}>
-                                            {example}
-                                        </List.Item>
-                                    ))}
-                                </List>
+                <SimpleGrid cols={{ base: 1, sm: 2, md: 2, lg:4 }} spacing="xl" verticalSpacing="xl">
+                    {useCaseCards.map((item) => (
+                        <Card key={item.title} shadow="md" padding="lg" radius="lg" withBorder h="100%">
+                            <Stack align="center" ta="center" h="100%" gap="md">
+                                <ThemeIcon size={50} radius="lg" variant="light" color={item.color}>
+                                    <item.icon stroke={1.5} size={28}/>
+                                </ThemeIcon>
+                                <Title order={4} size="h5">{item.title}</Title>
+                                <Text size="sm" c="dimmed" style={{flexGrow: 1}}>{item.text}</Text>
                             </Stack>
                         </Card>
                     ))}
@@ -306,248 +166,29 @@ export default function LandingPage() {
         </Container>
 
         {/* How It Works Section */}
-        <Box style={{ backgroundColor: theme.colors.gray[0] }}>
+        <Box bg={theme.colors.gray[0]}>
             <Container size="lg" py={{ base: 'xl', sm: `calc(${theme.spacing.xl} * 3)`}}>
                 <Stack gap="xl">
                     <Box ta="center" mb="lg">
-                        <Badge size="lg" variant="light" color="vibrantTeal" radius="xl" mb="md">
-                            Simple & Powerful
-                        </Badge>
-                        <Title order={2} size="h1" mb="md">
-                            Track What Matters in 3 Steps
-                        </Title>
+                        <Title order={2} size="h1" mb="xs">Get Started in Seconds</Title>
                         <Text size="lg" c="dimmed" maw={600} mx="auto">
-                            No complex setup, no learning curve. Just pure, beautiful time tracking.
+                            Tracking time shouldn&apos;t be complicated. With DaysSince, it&apos;s beautifully simple:
                         </Text>
                     </Box>
-
-                    <SimpleGrid
-                        cols={{ base: 1, md: 3 }}
-                        spacing={{ base: 'xl', sm: 'xl' }}
-                        verticalSpacing="xl"
-                    >
-                        {/* Step 1 */}
-                        <Paper shadow="md" radius="xl" p="xl" style={{height: '100%', position: 'relative'}}>
-                            <Badge 
-                                size="lg" 
-                                variant="filled" 
-                                color="deepBlue" 
-                                radius="xl"
-                                style={{ position: 'absolute', top: -12, left: 20 }}
-                            >
-                                Step 1
-                            </Badge>
-                            <Stack align="center" ta="center" gap="lg" pt="md">
-                                <ThemeIcon 
-                                    size={80} 
-                                    radius="xl" 
-                                    variant="gradient" 
-                                    gradient={{ from: theme.primaryColor, to: theme.colors.vibrantTeal[5] }}
-                                >
-                                    <IconPlus size={40} stroke={1.8} />
-                                </ThemeIcon>
-                                <Title order={3} size="h3" fw={700}>Create Your Counter</Title>
-                                
-                                <Box 
-                                    h={200} 
-                                    w="100%" 
-                                    style={{ 
-                                        backgroundColor: theme.colors.deepBlue[0], 
-                                        borderRadius: theme.radius.lg, 
-                                        display: 'flex', 
-                                        alignItems: 'center', 
-                                        justifyContent: 'center', 
-                                        border: `2px dashed ${theme.colors.deepBlue[3]}`,
-                                        position: 'relative',
-                                        overflow: 'hidden'
-                                    }}
-                                >
-                                    <Stack align="center" gap="xs">
-                                        <IconCalendar size={48} color={theme.colors.deepBlue[4]} stroke={1} />
-                                        <Text c="deepBlue.6" size="sm" fw={500}>Beautiful Creation Form</Text>
-                                        <Text c="dimmed" size="xs">Name, date, tags, privacy settings</Text>
-                                    </Stack>
-                                </Box>
-                                
-                                <Text c="dimmed" size="sm" style={{minHeight: '80px', lineHeight: 1.6}}>
-                                    Add any milestone with a meaningful name, start date, description, and tags. 
-                                    Choose to keep it private for personal reflection or make it public to inspire others.
-                                </Text>
-                            </Stack>
-                        </Paper>
-
-                        {/* Step 2 */}
-                        <Paper shadow="md" radius="xl" p="xl" style={{height: '100%', position: 'relative'}}>
-                            <Badge 
-                                size="lg" 
-                                variant="filled" 
-                                color="vibrantTeal" 
-                                radius="xl"
-                                style={{ position: 'absolute', top: -12, left: 20 }}
-                            >
-                                Step 2
-                            </Badge>
-                            <Stack align="center" ta="center" gap="lg" pt="md">
-                                <ThemeIcon 
-                                    size={80} 
-                                    radius="xl" 
-                                    variant="gradient" 
-                                    gradient={{ from: theme.colors.vibrantTeal[5], to: theme.colors.vibrantTeal[7] }}
-                                >
-                                    <IconEye size={40} stroke={1.8} />
-                                </ThemeIcon>
-                                <Title order={3} size="h3" fw={700}>Watch Time Unfold</Title>
-                                
-                                <Box 
-                                    h={200} 
-                                    w="100%" 
-                                    style={{ 
-                                        backgroundColor: theme.colors.vibrantTeal[0], 
-                                        borderRadius: theme.radius.lg, 
-                                        display: 'flex', 
-                                        alignItems: 'center', 
-                                        justifyContent: 'center', 
-                                        border: `2px dashed ${theme.colors.vibrantTeal[3]}`,
-                                        position: 'relative'
-                                    }}
-                                >
-                                    <Stack align="center" gap="xs">
-                                        <IconFlame size={48} color={theme.colors.vibrantTeal[5]} stroke={1.2} />
-                                        <Text c="vibrantTeal.7" size="lg" fw={700}>847 Days</Text>
-                                        <Text c="vibrantTeal.6" size="sm">12 hours, 34 minutes</Text>
-                                        <Text c="dimmed" size="xs">Live counter display</Text>
-                                    </Stack>
-                                </Box>
-                                
-                                <Text c="dimmed" size="sm" style={{minHeight: '80px', lineHeight: 1.6}}>
-                                    Watch your counters grow in real-time with precise calculations down to the second. 
-                                    Your dashboard organizes everything beautifully with intuitive, motivating displays.
-                                </Text>
-                            </Stack>
-                        </Paper>
-
-                        {/* Step 3 */}
-                        <Paper shadow="md" radius="xl" p="xl" style={{height: '100%', position: 'relative'}}>
-                            <Badge 
-                                size="lg" 
-                                variant="filled" 
-                                color="orange" 
-                                radius="xl"
-                                style={{ position: 'absolute', top: -12, left: 20 }}
-                            >
-                                Step 3
-                            </Badge>
-                            <Stack align="center" ta="center" gap="lg" pt="md">
-                                <ThemeIcon 
-                                    size={80} 
-                                    radius="xl" 
-                                    variant="gradient" 
-                                    gradient={{ from: 'orange.5', to: 'orange.7' }}
-                                >
-                                    <IconShare size={40} stroke={1.8} />
-                                </ThemeIcon>
-                                <Title order={3} size="h3" fw={700}>Share & Discover</Title>
-                                
-                                <Box 
-                                    h={200} 
-                                    w="100%" 
-                                    style={{ 
-                                        backgroundColor: theme.colors.orange[0], 
-                                        borderRadius: theme.radius.lg, 
-                                        display: 'flex', 
-                                        alignItems: 'center', 
-                                        justifyContent: 'center', 
-                                        border: `2px dashed ${theme.colors.orange[3]}`,
-                                        position: 'relative'
-                                    }}
-                                >
-                                    <Stack align="center" gap="xs">
-                                        <IconUsers size={48} color={theme.colors.orange[5]} stroke={1.2} />
-                                        <Text c="orange.7" size="sm" fw={600}>Community Explore</Text>
-                                        <Text c="dimmed" size="xs">Discover inspiring journeys</Text>
-                                    </Stack>
-                                </Box>
-                                
-                                <Text c="dimmed" size="sm" style={{minHeight: '80px', lineHeight: 1.6}}>
-                                    Make your counters public to inspire others, or browse fascinating timelines 
-                                    shared by the community. Find motivation in others&apos; journeys and milestones.
-                                </Text>
-                            </Stack>
-                        </Paper>
-                    </SimpleGrid>
-                </Stack>
-            </Container>
-        </Box>
-
-        {/* Features Section */}
-        <Container size="lg" py={{ base: 'xl', sm: `calc(${theme.spacing.xl} * 3)`}}>
-            <Stack gap="xl">
-                <Box ta="center" mb="lg">
-                    <Title order={2} size="h1" mb="md">
-                        Built for Everyone, Perfected for You
-                    </Title>
-                    <Text size="lg" c="dimmed" maw={600} mx="auto">
-                        Every feature designed with intention, every detail crafted for the perfect time-tracking experience.
-                    </Text>
-                </Box>
-
-                <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="xl">
-                    {features.map((feature, index) => (
-                        <Group key={index} align="flex-start" gap="lg">
-                            <ThemeIcon 
-                                size={50} 
-                                radius="lg" 
-                                variant="light" 
-                                color="deepBlue"
-                                style={{ flexShrink: 0, marginTop: 4 }}
-                            >
-                                <feature.icon size={28} stroke={1.5} />
-                            </ThemeIcon>
-                            <Stack gap="xs" style={{flex: 1}}>
-                                <Title order={4} size="h4" fw={600}>{feature.title}</Title>
-                                <Text c="dimmed" size="sm" style={{lineHeight: 1.6}}>
-                                    {feature.description}
-                                </Text>
-                            </Stack>
-                        </Group>
-                    ))}
-                </SimpleGrid>
-            </Stack>
-        </Container>
-
-        {/* Social Proof Section */}
-        <Box style={{ backgroundColor: theme.colors.gray[0] }}>
-            <Container size="lg" py={{ base: 'xl', sm: `calc(${theme.spacing.xl} * 2.5)`}}>
-                <Stack gap="xl">
-                    <Box ta="center">
-                        <Title order={2} size="h1" mb="md">
-                            Stories That Inspire Us
-                        </Title>
-                        <Text size="lg" c="dimmed" maw={500} mx="auto">
-                            Real people, real milestones, real motivation.
-                        </Text>
-                    </Box>
-
-                    <SimpleGrid cols={{ base: 1, md: 3 }} spacing="lg">
-                        {testimonials.map((testimonial, index) => (
-                            <Paper key={index} shadow="sm" p="lg" radius="lg" withBorder>
-                                <Stack gap="md">
-                                    <Group gap="xs">
-                                        {[...Array(5)].map((_, i) => (
-                                            <IconStar key={i} size={16} fill={theme.colors.yellow[5]} color={theme.colors.yellow[5]} />
-                                        ))}
-                                    </Group>
-                                    <Text style={{lineHeight: 1.6}} size="sm">
-                                        &quot;{testimonial.text}&quot;
-                                    </Text>
-                                    <Group justify="space-between" align="center">
-                                        <Text size="sm" fw={500} c="dimmed">
-                                            — {testimonial.author}
-                                        </Text>
-                                        <Badge size="sm" variant="light" color="green">
-                                            {testimonial.badge}
-                                        </Badge>
-                                    </Group>
+                    <SimpleGrid cols={{ base: 1, md: 3 }} spacing="xl" verticalSpacing="xl">
+                        {howItWorksSteps.map((step, index) => (
+                            <Paper key={index} withBorder shadow="sm" radius="lg" p="xl" style={{height: '100%', backgroundColor: theme.white}}>
+                                <Stack align="center" ta="center" gap="lg">
+                                    <ThemeIcon size={60} radius={60} variant="gradient" gradient={{ from: theme.primaryColor, to: theme.colors.vibrantTeal[5] }}>
+                                        <step.icon size={30} stroke={1.8} />
+                                    </ThemeIcon>
+                                    <Title order={3} size="h4">{step.title}</Title>
+                                    {/* IMAGE PLACEHOLDER - Replace with actual <Image /> component when ready */}
+                                    <Box h={180} w="100%" style={{ backgroundColor: theme.colors.gray[2] , borderRadius: theme.radius.md, display: 'flex', alignItems: 'center', justifyContent: 'center', border: `1px dashed ${theme.colors.gray[4]}` }}>
+                                        <Text c="dimmed" size="sm">{step.imagePlaceholderText}</Text>
+                                        {/* Example: <Image src="/images/step1-create-form.png" alt={step.title} layout="fill" objectFit="contain" style={{borderRadius: theme.radius.md}} /> */}
+                                    </Box>
+                                    <Text c="dimmed" size="sm" style={{minHeight: '60px'}}>{step.text}</Text>
                                 </Stack>
                             </Paper>
                         ))}
@@ -556,29 +197,54 @@ export default function LandingPage() {
             </Container>
         </Box>
 
-        {/* Final CTA Section */}
-        <Container size="md" py={{ base: 'xl', sm: `calc(${theme.spacing.xl} * 3)`}}>
-            <Paper 
-                shadow="xl" 
-                p="xl" 
-                radius="xl" 
-                style={{
-                    background: `linear-gradient(135deg, ${theme.colors.deepBlue[6]} 0%, ${theme.colors.vibrantTeal[6]} 100%)`,
-                    color: theme.white,
-                    textAlign: 'center'
-                }}
-            >
-                <Stack align="center" gap="lg">
-                    <IconSparkles size={48} stroke={1.5} color={theme.colors.vibrantTeal[2]} />
-                    <Title order={2} size="h1">
-                        Your Journey Starts Now
-                    </Title>
-                    <Text size="lg" c="deepBlue.1" maw={450}>
-                        Join thousands who&apos;ve discovered the power of intentional time tracking. 
-                        Every day counts—make yours count too.
+        {/* Features At a Glance Section */}
+        <Container size="lg" py={{ base: 'xl', sm: `calc(${theme.spacing.xl} * 3)`}}>
+            <Stack gap="xl">
+                <Box ta="center" mb="lg">
+                    <Title order={2} size="h1" mb="xs">Everything You Need, Nothing You Don&apos;t</Title>
+                     <Text size="lg" c="dimmed" maw={600} mx="auto">
+                        Packed with thoughtful features to make your time tracking experience seamless and insightful.
                     </Text>
-                    
-                    <Group gap="md" mt="lg">
+                </Box>
+                <SimpleGrid cols={{ base: 1, sm: 2, md: 3 }} spacing="xl">
+                    {features.map(feature => (
+                        <Group key={feature.title} align="flex-start" gap="md" p="xs" style={{borderRadius: theme.radius.md}}>
+                             <ThemeIcon size={44} radius="md" variant="light" color={theme.primaryColor}>
+                                <feature.icon stroke={1.5} size={24} />
+                            </ThemeIcon>
+                            <Box style={{flex: 1}}>
+                                <Text fw={600} size="md" mb={4}>{feature.title}</Text>
+                                <Text size="sm" c="dimmed">{feature.description}</Text>
+                            </Box>
+                        </Group>
+                    ))}
+                </SimpleGrid>
+            </Stack>
+        </Container>
+
+        {/* Final Call to Action Section */}
+        <Box bg={`linear-gradient(45deg, ${theme.colors.gray[0]} 0%, ${theme.colors.gray[1]} 100%)`}>
+            <Container size="md" py={{ base: `calc(${theme.spacing.xl} * 2)`, sm: `calc(${theme.spacing.xl} * 4)`}}>
+                <Paper
+                    shadow="xl"
+                    p={{base: "lg", sm:"xl"}}
+                    radius="xl"
+                    style={{
+                        background: `linear-gradient(135deg, ${theme.colors.deepBlue[7]} 0%, ${theme.colors.vibrantTeal[6]} 100%)`,
+                        color: theme.white,
+                        textAlign: 'center'
+                    }}
+                >
+                    <Stack align="center" gap="lg">
+                        <ThemeIcon size={60} radius={60} variant="outline" color="white">
+                            <IconSparkles size={32} stroke={1.5} style={{ color: theme.white }} />
+                        </ThemeIcon>
+                        <Title order={2} style={{ fontSize: 'clamp(2rem, 5vw, 2.8rem)' }}>
+                            Ready to Make Every Day Count?
+                        </Title>
+                        <Text size="lg" c={theme.colors.deepBlue[1]} maw={500} style={{opacity: 0.9}}>
+                            Stop wondering, start tracking. Your significant moments deserve to be remembered and celebrated. Join DaysSince for free.
+                        </Text>
                         <Button
                             component={Link}
                             href={isAuthenticated ? "/home" : "/explore"}
@@ -586,18 +252,18 @@ export default function LandingPage() {
                             radius="xl"
                             variant="white"
                             color={theme.primaryColor}
-                            rightSection={<IconArrowRight size={20} stroke={1.8}/>}
+                            rightSection={<IconArrowRight size={22} stroke={1.8}/>}
+                            mt="md"
                         >
-                            {isAuthenticated ? "View My Counters" : "Start Exploring Free"}
+                            {isAuthenticated ? "Go to My Counters" : "Start Tracking Now"}
                         </Button>
-                    </Group>
-                    
-                    <Text size="xs" c="deepBlue.2" mt="sm">
-                        Free forever. No credit card required. Start in seconds.
-                    </Text>
-                </Stack>
-            </Paper>
-        </Container>
+                        <Text size="xs" c={theme.colors.deepBlue[2]} mt="xs" style={{opacity: 0.7}}>
+                            Free forever. No credit card required.
+                        </Text>
+                    </Stack>
+                </Paper>
+            </Container>
+        </Box>
     </MainLayout>
   );
 }
