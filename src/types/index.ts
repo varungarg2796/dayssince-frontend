@@ -10,18 +10,25 @@ export interface Counter {
   id: string;
   userId: string;
   name: string;
-  slug: string; // Added
+  slug: string;
   description: string | null;
-  startDate: string;
-  archivedAt: string | null;
+  startDate: string; // ISO Date String
+  archivedAt: string | null; // ISO Date String
   isPrivate: boolean;
   viewCount: number;
-  createdAt: string;
-  updatedAt: string;
+  createdAt: string; // ISO Date String
+  updatedAt: string; // ISO Date String
   tags: Tag[];
-  user?: {
+  user?: { // Optional user object, typically included for public counters
     username: string;
   };
+
+  // --- NEW CHALLENGE FIELDS ---
+  isChallenge?: boolean;          // Is this counter a challenge?
+  challengeDurationDays?: number; // Target duration in days
+  challengeAchievedAt?: string | null; // ISO Date String, when the challenge was met
+                                     // This will be null if not achieved or not a challenge.
+                                     // Backend might not set this in V1; frontend will calculate completion.
 }
 
 export interface User {
@@ -40,25 +47,37 @@ export interface UserCounters {
   archived: Counter[];
 }
 
-// Include optional slug
 export interface CreateCounterDto {
   name: string;
   description?: string;
-  startDate: string;
+  startDate: string; // ISO Date String from client
   isPrivate?: boolean;
   tagIds?: number[];
-  slug?: string; // Added
+  slug?: string;
+
+  // --- NEW CHALLENGE FIELDS ---
+  isChallenge?: boolean;
+  challengeDurationDays?: number; // Duration in days
 }
 
-// Include optional slug
+// UpdateCounterPayload will automatically include these new fields as optional
+// because it typically extends Partial<CreateCounterDto> or similar.
+// If defined explicitly, add them there too.
 export interface UpdateCounterPayload {
   name?: string;
   description?: string;
-  startDate?: string;
+  startDate?: string; // ISO Date String from client
   isPrivate?: boolean;
   tagIds?: number[];
-  slug?: string; // Added
+  slug?: string;
+
+  // --- NEW CHALLENGE FIELDS ---
+  isChallenge?: boolean;
+  challengeDurationDays?: number;
+  // Note: We are not allowing the client to directly set challengeAchievedAt.
+  // That will be determined by logic (backend in future, or frontend for now).
 }
+
 
 export interface FindPublicCountersOptions {
   page?: number;
@@ -70,7 +89,7 @@ export interface FindPublicCountersOptions {
 }
 
 export interface PaginatedCountersResult {
-  items: Counter[]; // Counter now includes slug
+  items: Counter[];
   totalItems: number;
   totalPages: number;
   currentPage: number;
