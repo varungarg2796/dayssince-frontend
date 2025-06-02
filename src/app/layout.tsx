@@ -5,6 +5,7 @@ import { ColorSchemeScript } from '@mantine/core';
 import { Providers } from './providers';
 import  {PageLoadingIndicator}  from '@/components/Layout/PageLoadingIndicator';
 import { Inter } from 'next/font/google';
+import { Analytics } from '@vercel/analytics/react';
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
 
@@ -31,6 +32,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
            </Suspense>
 
            {children}
+          <Analytics /> {/* Add this line */}
         </Providers>
       </body>
     </html>
